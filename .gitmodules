@@ -1,0 +1,6 @@
+[submodule "agrosafe-contracts/lib/forge-std"]
+	path = agrosafe-contracts/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "agrosafe-contracts/lib/openzeppelin-contracts"]
+	path = agrosafe-contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
