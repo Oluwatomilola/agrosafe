@@ -12,3 +12,7 @@ docs/
 
 # Dotenv file
 .env
+agrosafe-contracts/lib
+
+foundry.lock/
+foundry.toml/
