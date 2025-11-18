@@ -1,35 +1,20 @@
-import { Button, Flex, Spacer, Text } from '@chakra-ui/react';
-import { useWeb3React } from '@web3-react/core';
-import { injected } from '../App';
+import React from "react";
+import ConnectButton from "./ConnectButton";
 
-export default function Navbar() {
-    const { active, account, activate, deactivate } = useWeb3React();
-
-    const connect = async () => {
-        try {
-            await activate(injected);
-        } catch (ex) {
-            console.log(ex);
-        }
-    };
-
-    const disconnect = () => {
-        deactivate();
-    };
-
+export default function Navbar({ setRoute }: { setRoute: (r: string) => void }) {
     return (
-        <Flex bg="green.600" p={4} color="white">
-            <Text fontSize="xl" fontWeight="bold">AgroSafe</Text>
-            <Spacer />
-            {active ? (
-                <Button colorScheme="whiteAlpha" onClick={disconnect}>
-                    {`${account.substring(0, 6)}...${account.substring(38)}`}
-                </Button>
-            ) : (
-                <Button colorScheme="whiteAlpha" onClick={connect}>
-                    Connect Wallet
-                </Button>
-            )}
-        </Flex>
+        <header className="flex justify-between items-center p-4 bg-white shadow">
+            <div className="flex items-center space-x-4">
+                <h1 className="text-xl font-bold">AgroSafe</h1>
+                <nav className="space-x-3">
+                    <button onClick={() => setRoute("dashboard")} className="link">Dashboard</button>
+                    <button onClick={() => setRoute("register")} className="link">Register</button>
+                    <button onClick={() => setRoute("produce")} className="link">Produce</button>
+                    <button onClick={() => setRoute("admin")} className="link">Admin</button>
+                    <button onClick={() => setRoute("trace")} className="link">Trace</button>
+                </nav>
+            </div>
+            <ConnectButton />
+        </header>
     );
 }
