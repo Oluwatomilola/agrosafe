@@ -3,12 +3,12 @@ import { Web3ReactProvider } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import { Web3ReactManager } from './components/Web3ReactManager';
-import Navbar from './components/Navbar';
+import Navbar from './components/Navbar.js';
 import FarmerRegistration from './components/FarmerRegistration';
 import RecordProduce from './components/RecordProduce';
 import FarmerVerification from './components/FarmerVerification';
 import CertifyProduce from './components/CertifyProduce';
-import Dashboard from './Pages/Dashboard.jsx';
+import Dashboard from './Pages/Dashboard.tsx';
 
 export const injected = new InjectedConnector({
     supportedChainIds: [1, 3, 4, 5, 42, 1337], // Add your network ID

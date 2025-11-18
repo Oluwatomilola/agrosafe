@@ -1,0 +1,126 @@
+[
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "farmerId", "type": "uint256" },
+      { "indexed": false, "internalType": "string", "name": "name", "type": "string" },
+      { "indexed": true, "internalType": "address", "name": "wallet", "type": "address" }
+    ],
+    "name": "FarmerRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "farmerId", "type": "uint256" },
+      { "indexed": false, "internalType": "bool", "name": "status", "type": "bool" }
+    ],
+    "name": "FarmerVerified",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "produceId", "type": "uint256" },
+      { "indexed": true, "internalType": "uint256", "name": "farmerId", "type": "uint256" },
+      { "indexed": false, "internalType": "string", "name": "cropType", "type": "string" }
+    ],
+    "name": "ProduceRecorded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "produceId", "type": "uint256" },
+      { "indexed": false, "internalType": "bool", "name": "certified", "type": "bool" }
+    ],
+    "name": "ProduceCertified",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "farmerId", "type": "uint256" },
+      { "internalType": "bool", "name": "status", "type": "bool" }
+    ],
+    "name": "verifyFarmer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "location", "type": "string" }
+    ],
+    "name": "registerFarmer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "cropType", "type": "string" },
+      { "internalType": "string", "name": "harvestDate", "type": "string" }
+    ],
+    "name": "recordProduce",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "produceId", "type": "uint256" },
+      { "internalType": "bool", "name": "status", "type": "bool" }
+    ],
+    "name": "certifyProduce",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "wallet", "type": "address" }
+    ],
+    "name": "farmerIdsByWallet",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "farmerId", "type": "uint256" }
+    ],
+    "name": "farmers",
+    "outputs": [
+      { "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "address", "name": "wallet", "type": "address" },
+      { "internalType": "string", "name": "location", "type": "string" },
+      { "internalType": "bool", "name": "verified", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "produceId", "type": "uint256" }
+    ],
+    "name": "produce",
+    "outputs": [
+      { "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "internalType": "string", "name": "cropType", "type": "string" },
+      { "internalType": "string", "name": "harvestDate", "type": "string" },
+      { "internalType": "uint256", "name": "farmerId", "type": "uint256" },
+      { "internalType": "bool", "name": "certified", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
