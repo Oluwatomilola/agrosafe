@@ -8,7 +8,7 @@ import FarmerRegistration from './components/FarmerRegistration';
 import RecordProduce from './components/RecordProduce';
 import FarmerVerification from './components/FarmerVerification';
 import CertifyProduce from './components/CertifyProduce';
-import Dashboard from './components/Dashboard';
+import Dashboard from './Pages/Dashboard.jsx';
 
 export const injected = new InjectedConnector({
     supportedChainIds: [1, 3, 4, 5, 42, 1337], // Add your network ID

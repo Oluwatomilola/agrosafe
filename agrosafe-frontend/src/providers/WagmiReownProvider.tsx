@@ -18,7 +18,6 @@ const appKit = createAppKit({
     chains
 });
 
-
 // wagmi config via appKit helper
 const wagmiConfig = createConfig({
     publicClient,
