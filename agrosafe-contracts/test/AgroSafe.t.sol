@@ -41,9 +41,13 @@ contract AgroSafeTest is Test {
     }
 
     function test_record_produce() public {
-        // First register a farmer
+        // First register and verify a farmer
         vm.prank(farmer);
         agroSafe.registerFarmer("Test Farmer", "Test Location");
+        
+        // Verify the farmer (only owner can do this)
+        vm.prank(owner);
+        agroSafe.verifyFarmer(1, true);
 
         // Record produce
         string memory cropType = "Wheat";
@@ -52,13 +56,13 @@ contract AgroSafeTest is Test {
         vm.prank(farmer);
         agroSafe.recordProduce(cropType, harvestDate);
 
-        (uint256 id, string memory produceCropType, string memory produceHarvestDate, uint256 farmerId, bool certified) = 
+        (uint256 id, uint256 farmerId, string memory produceCropType, string memory produceHarvestDate, bool certified) = 
             agroSafe.produce(1);
             
         assertEq(id, 1);
+        assertEq(farmerId, 1);
         assertEq(produceCropType, cropType);
         assertEq(produceHarvestDate, harvestDate);
-        assertEq(farmerId, 1);
         assertEq(certified, false);
         assertEq(agroSafe.totalProduce(), 1);
     }
@@ -86,6 +90,11 @@ contract AgroSafeTest is Test {
         vm.prank(farmer);
         agroSafe.registerFarmer("Test Farmer", "Test Location");
         
+        // Verify the farmer first
+        vm.prank(owner);
+        agroSafe.verifyFarmer(1, true);
+        
+        // Record produce
         vm.prank(farmer);
         agroSafe.recordProduce("Wheat", "2023-11-29");
 
@@ -98,8 +107,28 @@ contract AgroSafeTest is Test {
         vm.prank(owner);
         agroSafe.certifyProduce(1, true);
 
-        (,,, uint256 farmerId, bool certified) = agroSafe.produce(1);
-        assertEq(farmerId, 1);
+        (,,,, bool certified) = agroSafe.produce(1);
         assertTrue(certified);
+    }
+    
+    function test_cannot_record_produce_unverified_farmer() public {
+        // Register but don't verify the farmer
+        vm.prank(farmer);
+        agroSafe.registerFarmer("Test Farmer", "Test Location");
+        
+        // Try to record produce - should fail
+        vm.prank(farmer);
+        vm.expectRevert("Farmer not verified");
+        agroSafe.recordProduce("Wheat", "2023-11-29");
+    }
+    
+    function test_cannot_register_farmer_twice() public {
+        vm.prank(farmer);
+        agroSafe.registerFarmer("Test Farmer", "Test Location");
+        
+        // Try to register again with same wallet
+        vm.prank(farmer);
+        vm.expectRevert("Farmer already registered");
+        agroSafe.registerFarmer("Test Farmer 2", "Different Location");
     }
 }
