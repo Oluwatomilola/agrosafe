@@ -52,13 +52,13 @@ contract AgroSafeTest is Test {
         vm.prank(farmer);
         agroSafe.recordProduce(cropType, harvestDate);
 
-        (uint256 id, uint256 farmerId, string memory produceCropType, string memory produceHarvestDate, bool certified) = 
+        (uint256 id, string memory produceCropType, string memory produceHarvestDate, uint256 farmerId, bool certified) = 
             agroSafe.produce(1);
             
         assertEq(id, 1);
-        assertEq(farmerId, 1);
         assertEq(produceCropType, cropType);
         assertEq(produceHarvestDate, harvestDate);
+        assertEq(farmerId, 1);
         assertEq(certified, false);
         assertEq(agroSafe.totalProduce(), 1);
     }
@@ -98,7 +98,8 @@ contract AgroSafeTest is Test {
         vm.prank(owner);
         agroSafe.certifyProduce(1, true);
 
-        (,,,,, bool certified) = agroSafe.produce(1);
+        (,,, uint256 farmerId, bool certified) = agroSafe.produce(1);
+        assertEq(farmerId, 1);
         assertTrue(certified);
     }
 }

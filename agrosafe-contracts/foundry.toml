@@ -1,22 +1,20 @@
 [profile.default]
-src = "src"
-out = "out"
-libs = ["lib"]
+src = 'src'
+out = 'out'
+libs = ['lib']
 
 # Compiler settings
-solc_version = "0.8.20"
+solc = '0.8.20'
 optimizer = true
 optimizer_runs = 200
 
-# Network configurations
-[etherscan]
-base = { key = "${ETHERSCAN_API_KEY}" }
-
 # Remappings
-remappings = [
-    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/"
-]
+remappings = ['@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/']
 
 # Fuzz configuration
 [fuzz]
 runs = 10000
+
+# Etherscan verification (uncomment and set your API key)
+# [etherscan]
+# base = { key = "${ETHERSCAN_API_KEY}" }
