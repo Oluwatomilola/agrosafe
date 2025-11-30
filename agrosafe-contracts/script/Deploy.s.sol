@@ -12,8 +12,11 @@ contract DeployAgroSafe is Script {
         // Start broadcasting transactions
         vm.startBroadcast(deployerPrivateKey);
         
-        // Deploy the contract
-        AgroSafe agroSafe = new AgroSafe();
+        // Get the deployer's address
+        address deployer = vm.addr(deployerPrivateKey);
+        
+        // Deploy the contract with the deployer as the initial owner
+        AgroSafe agroSafe = new AgroSafe(deployer);
         
         // Log the deployed contract address
         console.log("AgroSafe deployed to:", address(agroSafe));
