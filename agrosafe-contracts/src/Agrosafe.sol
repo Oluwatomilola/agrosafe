@@ -2,13 +2,24 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title AgroSafe
  * @dev Simple registry and verification contract for farmers and produce.
  * Uses native uint counters instead of Counters.sol.
  */
-contract AgroSafe is Ownable {
+contract AgroSafe is Ownable, ReentrancyGuard {
+    /// @dev Error for zero address validation
+    error ZeroAddressNotAllowed(address invalidAddress);
+
+    /// @dev Modifier to check for zero address
+    modifier notZeroAddress(address addr) {
+        if (addr == address(0)) {
+            revert ZeroAddressNotAllowed(addr);
+        }
+        _;
+    }
     uint256 private _farmerIds;
     uint256 private _produceIds;
 
@@ -38,14 +49,15 @@ contract AgroSafe is Ownable {
     event ProduceCertified(uint256 indexed id, bool certified);
 
     /**
-     * @dev Passes msg.sender as the initial owner to the Ownable constructor.
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     * @param initialOwner The address to set as the initial owner of the contract.
      */
-    constructor() Ownable(msg.sender) {}
+    constructor(address initialOwner) Ownable(initialOwner) notZeroAddress(initialOwner) {}
 
     /**
      * @notice Register a new farmer
      */
-    function registerFarmer(string memory name, string memory location) external {
+    function registerFarmer(string memory name, string memory location) external nonReentrant {
         require(farmerIdsByWallet[msg.sender] == 0, "Farmer already registered");
 
         _farmerIds++;
@@ -66,17 +78,26 @@ contract AgroSafe is Ownable {
 
     /**
      * @notice Verify a farmer (only owner/admin)
+     * @param farmerId The ID of the farmer to verify
+     * @param status The verification status to set
      */
-    function verifyFarmer(uint256 farmerId, bool status) external onlyOwner {
+    function verifyFarmer(uint256 farmerId, bool status) external onlyOwner nonReentrant {
+        require(farmerId != 0, "Invalid farmer ID");
         require(farmers[farmerId].id != 0, "Farmer not found");
+        
+        address farmerAddress = farmers[farmerId].wallet;
+        require(farmerAddress != address(0), "Invalid farmer address");
+        
         farmers[farmerId].verified = status;
         emit FarmerVerified(farmerId, status);
     }
 
     /**
      * @notice Record a produce linked to a farmer
+     * @param cropType The type of crop being recorded
+     * @param harvestDate The harvest date of the produce
      */
-    function recordProduce(string memory cropType, string memory harvestDate) external {
+    function recordProduce(string memory cropType, string memory harvestDate) external notZeroAddress(msg.sender) nonReentrant {
         uint256 farmerId = farmerIdsByWallet[msg.sender];
         require(farmerId != 0, "Farmer not registered");
         require(farmers[farmerId].verified, "Farmer not verified");
@@ -97,8 +118,11 @@ contract AgroSafe is Ownable {
 
     /**
      * @notice Certify produce (only owner/admin)
+     * @param produceId The ID of the produce to certify
+     * @param certified The certification status to set
      */
-    function certifyProduce(uint256 produceId, bool certified) external onlyOwner {
+    function certifyProduce(uint256 produceId, bool certified) external onlyOwner nonReentrant {
+        require(produceId != 0, "Invalid produce ID");
         require(produce[produceId].id != 0, "Produce not found");
         produce[produceId].certified = certified;
         emit ProduceCertified(produceId, certified);
