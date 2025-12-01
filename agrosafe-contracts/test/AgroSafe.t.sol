@@ -18,7 +18,8 @@ contract AgroSafeTest is Test {
     }
     
     function test_constructor_revertsOnZeroAddress() public {
-        vm.expectRevert(abi.encodeWithSignature("ZeroAddressNotAllowed(address)", address(0)));
+        // OpenZeppelin's Ownable throws OwnableInvalidOwner for zero address
+        vm.expectRevert(abi.encodeWithSignature("OwnableInvalidOwner(address)", address(0)));
         new AgroSafe(address(0));
     }
     
