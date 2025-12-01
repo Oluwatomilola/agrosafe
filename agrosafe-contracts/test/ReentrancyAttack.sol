@@ -30,10 +30,16 @@ contract ReentrancyAttack {
         require(msg.sender == owner, "Only owner can attack");
         isAttacking = true;
         
-        // This will trigger the fallback function during the external call
-        agroSafe.recordProduce("Initial Crop", "2023-12-01");
+        try agroSafe.recordProduce("Initial Crop", "2023-12-01") {
+            // If the call succeeds, the reentrancy protection failed
+            revert("Reentrancy protection failed");
+        } catch (bytes memory) {
+            // Expected to fail with reentrancy protection
+            isAttacking = false;
+            return;
+        }
         
-        // Reset the attack flag
-        isAttacking = false;
+        // Should not reach here if reentrancy protection is working
+        revert("Unexpected execution path");
     }
 }
