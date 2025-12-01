@@ -160,9 +160,10 @@ contract AgroSafeTest is Test {
     
     function test_reentrancy_attack_should_fail() public {
         // Register and verify a farmer
-        vm.prank(farmer);
+        vm.startPrank(farmer);
         agroSafe.registerFarmer("Test Farmer", "Test Location");
         
+        vm.stopPrank();
         vm.prank(owner);
         agroSafe.verifyFarmer(1, true);
         
@@ -178,12 +179,16 @@ contract AgroSafeTest is Test {
         vm.prank(owner);
         agroSafe.verifyFarmer(2, true);
         
+        // Record initial produce count
+        uint256 initialProduceCount = agroSafe.totalProduce();
+        
         // The attack should fail due to reentrancy protection
+        vm.prank(attackerAddress);
         vm.expectRevert("ReentrancyGuard: reentrant call");
         attacker.attack();
         
-        // Verify only one produce was recorded (the initial one, not the reentrant one)
-        assertEq(agroSafe.totalProduce(), 1);
+        // Verify no additional produce was recorded
+        assertEq(agroSafe.totalProduce(), initialProduceCount, "No additional produce should be recorded");
     }
     
     function test_reentrancy_protection_on_all_functions() public {
