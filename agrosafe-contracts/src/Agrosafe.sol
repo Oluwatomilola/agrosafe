@@ -6,10 +6,12 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title AgroSafe
- * @dev Simple registry and verification contract for farmers and produce.
+ * @dev Registry and verification contract for farmers and produce with pagination support.
  * Uses native uint counters instead of Counters.sol.
  */
 contract AgroSafe is Ownable, ReentrancyGuard {
+    /// @dev Maximum number of items that can be retrieved in a single paginated call
+    uint256 public constant MAX_ITEMS_PER_PAGE = 100;
     /// @dev Error for zero address validation
     error ZeroAddressNotAllowed(address invalidAddress);
 
@@ -129,13 +131,124 @@ contract AgroSafe is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Get total counts
+     * @notice Get total number of registered farmers
+     * @return Total count of farmers
      */
     function totalFarmers() external view returns (uint256) {
         return _farmerIds;
     }
 
+    /**
+     * @notice Get total number of recorded produce items
+     * @return Total count of produce items
+     */
     function totalProduce() external view returns (uint256) {
         return _produceIds;
+    }
+
+    /**
+     * @notice Get a paginated list of farmers
+     * @param offset Starting index (0-based)
+     * @param limit Maximum number of items to return (max 100)
+     * @return Array of Farmer structs
+     */
+    function getFarmersPaginated(uint256 offset, uint256 limit) external view returns (Farmer[] memory) {
+        require(limit > 0 && limit <= MAX_ITEMS_PER_PAGE, "Invalid limit");
+        require(offset < _farmerIds, "Offset out of bounds");
+        
+        uint256 end = offset + limit;
+        if (end > _farmerIds) {
+            end = _farmerIds;
+        }
+        
+        Farmer[] memory result = new Farmer[](end - offset);
+        
+        uint256 resultIndex = 0;
+        for (uint256 i = offset + 1; i <= end; i++) {
+            result[resultIndex] = farmers[i];
+            resultIndex++;
+        }
+        
+        return result;
+    }
+    
+    /**
+     * @notice Get a paginated list of produce items
+     * @param offset Starting index (0-based)
+     * @param limit Maximum number of items to return (max 100)
+     * @return Array of Produce structs
+     */
+    function getProducePaginated(uint256 offset, uint256 limit) external view returns (Produce[] memory) {
+        require(limit > 0 && limit <= MAX_ITEMS_PER_PAGE, "Invalid limit");
+        require(offset < _produceIds, "Offset out of bounds");
+        
+        uint256 end = offset + limit;
+        if (end > _produceIds) {
+            end = _produceIds;
+        }
+        
+        Produce[] memory result = new Produce[](end - offset);
+        
+        uint256 resultIndex = 0;
+        for (uint256 i = offset + 1; i <= end; i++) {
+            result[resultIndex] = produce[i];
+            resultIndex++;
+        }
+        
+        return result;
+    }
+    
+    /**
+     * @notice Get a paginated list of produce items for a specific farmer
+     * @param farmerId The ID of the farmer
+     * @param offset Starting index (0-based)
+     * @param limit Maximum number of items to return (max 100)
+     * @return Array of Produce structs
+     */
+    function getProduceByFarmerPaginated(
+        uint256 farmerId, 
+        uint256 offset, 
+        uint256 limit
+    ) external view returns (Produce[] memory) {
+        require(limit > 0 && limit <= MAX_ITEMS_PER_PAGE, "Invalid limit");
+        require(farmerId != 0 && farmers[farmerId].id != 0, "Invalid farmer ID");
+        
+        // First pass: count matching items
+        uint256 matchCount = 0;
+        for (uint256 i = 1; i <= _produceIds; i++) {
+            if (produce[i].farmerId == farmerId) {
+                if (matchCount >= offset) {
+                    if (matchCount - offset >= limit) break;
+                }
+                matchCount++;
+            }
+        }
+        
+        // Adjust matchCount based on offset and limit
+        if (offset >= matchCount) {
+            return new Produce[](0);
+        }
+        
+        uint256 resultSize = matchCount - offset;
+        if (resultSize > limit) {
+            resultSize = limit;
+        }
+        
+        // Second pass: collect matching items
+        Produce[] memory result = new Produce[](resultSize);
+        uint256 resultIndex = 0;
+        uint256 currentMatch = 0;
+        
+        for (uint256 i = 1; i <= _produceIds && resultIndex < resultSize; i++) {
+            if (produce[i].farmerId == farmerId) {
+                if (currentMatch >= offset) {
+                    result[resultIndex] = produce[i];
+                    resultIndex++;
+                }
+                currentMatch++;
+            }
+        }
+        
+        return result;
     }
 }
