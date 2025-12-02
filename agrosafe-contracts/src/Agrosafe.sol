@@ -12,13 +12,90 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 contract AgroSafe is Ownable, ReentrancyGuard {
     /// @dev Maximum number of items that can be retrieved in a single paginated call
     uint256 public constant MAX_ITEMS_PER_PAGE = 100;
-    /// @dev Error for zero address validation
+    // Constants for validation
+    uint256 public constant MIN_NAME_LENGTH = 2;
+    uint256 public constant MAX_NAME_LENGTH = 100;
+    uint256 public constant MIN_LOCATION_LENGTH = 3;
+    uint256 public constant MAX_LOCATION_LENGTH = 200;
+    uint256 public constant MIN_CROP_TYPE_LENGTH = 2;
+    uint256 public constant MAX_CROP_TYPE_LENGTH = 50;
+    uint256 public constant MIN_DATE_LENGTH = 10; // YYYY-MM-DD
+    uint256 public constant MAX_DATE_LENGTH = 10; // YYYY-MM-DD
+    
+    // Custom errors
     error ZeroAddressNotAllowed(address invalidAddress);
-
+    error StringTooShort(string field, uint256 minLength, uint256 actualLength);
+    error StringTooLong(string field, uint256 maxLength, uint256 actualLength);
+    error InvalidDateString(string date);
+    error InvalidFarmerStatus(bool requiredStatus, bool actualStatus);
+    
     /// @dev Modifier to check for zero address
     modifier notZeroAddress(address addr) {
         if (addr == address(0)) {
             revert ZeroAddressNotAllowed(addr);
+        }
+        _;
+    }
+    
+    /// @dev Validates that a string's length is within the specified bounds
+    modifier validStringLength(string memory str, uint256 minLen, uint256 maxLen, string memory field) {
+        bytes memory strBytes = bytes(str);
+        if (strBytes.length < minLen) {
+            revert StringTooShort(field, minLen, strBytes.length);
+        }
+        if (strBytes.length > maxLen) {
+            revert StringTooLong(field, maxLen, strBytes.length);
+        }
+        _;
+    }
+    
+    /// @dev Validates a date string format (YYYY-MM-DD)
+    modifier validDateString(string memory date) {
+        bytes memory dateBytes = bytes(date);
+        
+        // Check length
+        if (dateBytes.length != 10) {
+            revert InvalidDateString(date);
+        }
+        
+        // Check separators
+        if (dateBytes[4] != '-' || dateBytes[7] != '-') {
+            revert InvalidDateString(date);
+        }
+        
+        // Check that all other characters are digits
+        for (uint i = 0; i < dateBytes.length; i++) {
+            // Skip separators
+            if (i == 4 || i == 7) continue;
+            
+            // Check if character is a digit (0-9)
+            if (dateBytes[i] < 0x30 || dateBytes[i] > 0x39) {
+                revert InvalidDateString(date);
+            }
+        }
+        
+        // Additional validation for month (01-12) and day (01-31)
+        uint8 month = (uint8(dateBytes[5]) - 48) * 10 + (uint8(dateBytes[6]) - 48);
+        uint8 day = (uint8(dateBytes[8]) - 48) * 10 + (uint8(dateBytes[9]) - 48);
+        
+        if (month < 1 || month > 12) {
+            revert InvalidDateString(date);
+        }
+        
+        // Basic day validation (1-31, doesn't account for different month lengths)
+        if (day < 1 || day > 31) {
+            revert InvalidDateString(date);
+        }
+        
+        _;
+    }
+    
+    /// @dev Validates farmer status
+    modifier onlyVerifiedFarmer(address farmer) {
+        uint256 farmerId = farmerIdsByWallet[farmer];
+        require(farmerId != 0, "Farmer not registered");
+        if (!farmers[farmerId].verified) {
+            revert InvalidFarmerStatus(true, false);
         }
         _;
     }
@@ -59,7 +136,20 @@ contract AgroSafe is Ownable, ReentrancyGuard {
     /**
      * @notice Register a new farmer
      */
-    function registerFarmer(string memory name, string memory location) external nonReentrant {
+    /**
+     * @notice Register a new farmer
+     * @param name The name of the farmer (2-100 chars)
+     * @param location The location of the farmer (3-200 chars)
+     */
+    function registerFarmer(
+        string memory name, 
+        string memory location
+    ) 
+        external 
+        nonReentrant
+        validStringLength(name, MIN_NAME_LENGTH, MAX_NAME_LENGTH, "name")
+        validStringLength(location, MIN_LOCATION_LENGTH, MAX_LOCATION_LENGTH, "location")
+    {
         require(farmerIdsByWallet[msg.sender] == 0, "Farmer already registered");
 
         _farmerIds++;
@@ -99,23 +189,51 @@ contract AgroSafe is Ownable, ReentrancyGuard {
      * @param cropType The type of crop being recorded
      * @param harvestDate The harvest date of the produce
      */
-    function recordProduce(string memory cropType, string memory harvestDate) external notZeroAddress(msg.sender) nonReentrant {
-        uint256 farmerId = farmerIdsByWallet[msg.sender];
-        require(farmerId != 0, "Farmer not registered");
-        require(farmers[farmerId].verified, "Farmer not verified");
-
+    /**
+     * @dev Internal function to create a new produce record
+     */
+    function _createProduce(
+        uint256 _farmerId,
+        string memory _cropType,
+        string memory _harvestDate
+    ) internal returns (uint256) {
         _produceIds++;
-        uint256 produceId = _produceIds;
-
-        produce[produceId] = Produce({
-            id: produceId,
-            farmerId: farmerId,
-            cropType: cropType,
-            harvestDate: harvestDate,
+        uint256 newProduceId = _produceIds;
+        
+        produce[newProduceId] = Produce({
+            id: newProduceId,
+            farmerId: _farmerId,
+            cropType: _cropType,
+            harvestDate: _harvestDate,
             certified: false
         });
-
-        emit ProduceRecorded(produceId, farmerId, cropType);
+        
+        return newProduceId;
+    }
+    
+    /**
+     * @notice Record a new produce item
+     * @param cropType The type of crop (2-50 chars)
+     * @param harvestDate The harvest date in YYYY-MM-DD format
+     * @return The ID of the newly recorded produce
+     */
+    function recordProduce(
+        string memory cropType, 
+        string memory harvestDate
+    ) 
+        external 
+        notZeroAddress(msg.sender)
+        nonReentrant
+        onlyVerifiedFarmer(msg.sender)
+        validStringLength(cropType, MIN_CROP_TYPE_LENGTH, MAX_CROP_TYPE_LENGTH, "cropType")
+        validDateString(harvestDate)
+        returns (uint256)
+    {
+        uint256 farmerId = farmerIdsByWallet[msg.sender];
+        uint256 newProduceId = _createProduce(farmerId, cropType, harvestDate);
+        
+        emit ProduceRecorded(newProduceId, farmerId, cropType);
+        return newProduceId;
     }
 
     /**
