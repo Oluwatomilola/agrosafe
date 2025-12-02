@@ -91,7 +91,7 @@ contract AgroSafeTest is Test {
         agroSafe.registerFarmer("Another Farmer", "Another Location");
         
         vm.prank(anotherFarmer);
-        vm.expectRevert("Farmer not verified");
+        vm.expectRevert(abi.encodeWithSignature("InvalidFarmerStatus(bool,bool)", true, false));
         agroSafe.recordProduce("Corn", "2023-11-30");
     }
 
@@ -144,7 +144,7 @@ contract AgroSafeTest is Test {
         
         // Try to record produce - should fail
         vm.prank(farmer);
-        vm.expectRevert("Farmer not verified");
+        vm.expectRevert(abi.encodeWithSignature("InvalidFarmerStatus(bool,bool)", true, false));
         agroSafe.recordProduce("Wheat", "2023-11-29");
     }
     

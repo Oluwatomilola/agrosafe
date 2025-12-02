@@ -32,16 +32,18 @@ contract PaginationTest is Test {
         vm.prank(owner);
         agroSafe.verifyFarmer(2, true);
         
-        // Add some produce for farmer 1
+        // Add some produce for farmer 1 with valid dates (DD must be between 01-31)
+        string[5] memory dates1 = ["2023-01-01", "2023-01-15", "2023-01-20", "2023-01-25", "2023-01-31"];
         for (uint256 i = 0; i < 5; i++) {
             vm.prank(farmer1);
-            agroSafe.recordProduce("Crop A", string(abi.encodePacked("2023-01-", uint2str(i + 1))));
+            agroSafe.recordProduce("Crop A", dates1[i]);
         }
         
-        // Add some produce for farmer 2
+        // Add some produce for farmer 2 with valid dates
+        string[3] memory dates2 = ["2023-02-10", "2023-02-15", "2023-02-20"];
         for (uint256 i = 0; i < 3; i++) {
             vm.prank(farmer2);
-            agroSafe.recordProduce("Crop B", string(abi.encodePacked("2023-02-", uint2str(i + 1))));
+            agroSafe.recordProduce("Crop B", dates2[i]);
         }
     }
     
