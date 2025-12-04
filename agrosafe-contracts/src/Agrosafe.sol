@@ -147,6 +147,7 @@ contract AgroSafe is Ownable, ReentrancyGuard {
     ) 
         external 
         nonReentrant
+        notZeroAddress(msg.sender)  // Prevent zero-address registration
         validStringLength(name, MIN_NAME_LENGTH, MAX_NAME_LENGTH, "name")
         validStringLength(location, MIN_LOCATION_LENGTH, MAX_LOCATION_LENGTH, "location")
     {

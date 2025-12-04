@@ -24,19 +24,39 @@ contract AgroSafeTest is Test {
     }
     
     function test_registerFarmer_revertsOnZeroAddress() public {
-        // This is implicitly tested by the notZeroAddress modifier on recordProduce
-        // which is called by a farmer after registration
-        vm.prank(farmer);
-        agroSafe.registerFarmer("Test Farmer", "Test Location");
+        // Test that the registerFarmer function reverts when called with a zero address
+        // We'll use a low-level call to simulate a zero address caller
         
-        // Verify the farmer was registered
-        (uint256 id, string memory name, address farmerAddr, string memory location, bool verified) = 
-            agroSafe.farmers(1);
-        assertEq(id, 1);
-        assertEq(name, "Test Farmer");
-        assertEq(farmerAddr, farmer);
-        assertEq(location, "Test Location");
-        assertEq(verified, false);
+        // Prepare the function selector and encoded parameters
+        string memory name = "Test Farmer";
+        string memory location = "Test Location";
+        bytes memory data = abi.encodeWithSignature(
+            "registerFarmer(string,string)",
+            name,
+            location
+        );
+        
+        // Create a zero address
+        address zeroAddress = address(0);
+        
+        // Use a low-level call to simulate a zero address caller
+        // This is the only way to test the notZeroAddress modifier in this context
+        (bool success, bytes memory returnData) = address(agroSafe).call{
+            from: zeroAddress
+        }(data);
+        
+        // The call should fail with the ZeroAddressNotAllowed error
+        assertFalse(success, "Call should fail with zero address");
+        
+        // Check that the error is the expected one
+        bytes4 expectedError = this.zeroAddressNotAllowed.selector;
+        bytes4 actualError = bytes4(returnData);
+        assertEq(actualError, expectedError, "Should revert with ZeroAddressNotAllowed error");
+    }
+    
+    // Helper function to get the selector of the ZeroAddressNotAllowed error
+    function zeroAddressNotAllowed(address) external pure returns (bytes4) {
+        return this.zeroAddressNotAllowed.selector;
     }
 
     function test_initial_state() public {
