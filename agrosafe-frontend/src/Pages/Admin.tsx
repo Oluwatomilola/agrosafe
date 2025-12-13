@@ -93,6 +93,17 @@ export default function Admin() {
 
     const handleCertifyProduce = async (produceId: number, status: boolean) => {
         setLoading(true);
+        try {
+            const tx = await write.certifyProduce(produceId, status);
+            console.log("Certification tx:", tx);
+            alert(`Produce ${status ? 'certified' : 'decertified'} successfully!`);
+            // Update local state
+            setProduce(prev => prev.map(p => 
+                p.id === produceId ? { ...p, isCertified: status } : p
+            ));
+        } catch (err) {
+            console.error(err);
+            alert("Certification failed: " + (err as any).message);
         setError(null);
         setSuccess(null);
         
@@ -108,6 +119,17 @@ export default function Admin() {
         }
     };
 
+    return (
+        <div className="max-w-6xl mx-auto space-y-6">
+            <h2 className="text-2xl font-bold">Admin Panel</h2>
+            
+            {/* Tab Navigation */}
+            <div className="bg-white rounded shadow">
+                <div className="border-b border-gray-200">
+                    <nav className="flex space-x-8 px-6">
+                        <button
+                            onClick={() => setActiveTab('farmers')}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${
     if (loading && farmers.length === 0) {
         return (
             <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[200px]">
@@ -148,6 +170,7 @@ export default function Admin() {
                         </button>
                         <button
                             onClick={() => setActiveTab('produce')}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${
                             className={`py-2 px-1 border-b-2 font-medium text-sm ${
                                 activeTab === 'produce'
                                     ? 'border-blue-500 text-blue-600'
