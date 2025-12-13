@@ -1,3 +1,13 @@
+import React, { useState, useEffect } from "react";
+import { useAgroSafeRead, useAgroSafeWrite } from "../hooks/useAgroSafe";
+
+interface Produce {
+    id: number;
+    cropType: string;
+    harvestDate: string;
+    farmerId: number;
+    isCertified: boolean;
+}
 import React, { useState } from "react";
 import { useAgroSafeWrite } from "../hooks/useAgroSafe";
 import { LoadingButton } from "../components/Loading";
