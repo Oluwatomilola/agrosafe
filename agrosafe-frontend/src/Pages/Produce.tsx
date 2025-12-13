@@ -8,132 +8,84 @@ interface Produce {
     farmerId: number;
     isCertified: boolean;
 }
+import React, { useState } from "react";
+import { useAgroSafeWrite } from "../hooks/useAgroSafe";
+import { LoadingButton } from "../components/Loading";
 
 export default function Produce() {
     const [cropType, setCropType] = useState("");
     const [harvestDate, setHarvestDate] = useState("");
-    const [produceList, setProduceList] = useState<Produce[]>([]);
     const [loading, setLoading] = useState(false);
-    const read = useAgroSafeRead();
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const write = useAgroSafeWrite();
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setError(null);
+        setSuccess(false);
+        
         try {
             const tx = await write.recordProduce(cropType, harvestDate);
             console.log("tx", tx);
-            alert("Produce recorded successfully!");
+            setSuccess(true);
             setCropType("");
             setHarvestDate("");
-            // Refresh the produce list
-            loadProduce();
         } catch (err) {
             console.error(err);
-            alert("Recording failed: " + (err as any).message);
+            setError("Recording failed: " + (err as any).message);
         } finally {
             setLoading(false);
         }
     };
 
-    const loadProduce = async () => {
-        try {
-            // For demo purposes, we'll load a few sample produce entries
-            // In a real app, you'd fetch from the contract
-            const sampleProduce: Produce[] = [
-                { id: 1, cropType: "Wheat", harvestDate: "2024-06-15", farmerId: 1, isCertified: true },
-                { id: 2, cropType: "Corn", harvestDate: "2024-07-20", farmerId: 2, isCertified: false },
-                { id: 3, cropType: "Rice", harvestDate: "2024-08-10", farmerId: 1, isCertified: true }
-            ];
-            setProduceList(sampleProduce);
-        } catch (e) {
-            console.error("Error loading produce:", e);
-        }
-    };
-
-    useEffect(() => {
-        loadProduce();
-    }, []);
-
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            <h2 className="text-2xl font-bold">Produce Management</h2>
+        <div className="max-w-xl mx-auto bg-white p-6 rounded shadow">
+            <h2 className="text-lg font-semibold mb-4">Record Produce</h2>
             
-            {/* Record New Produce Form */}
-            <div className="bg-white p-6 rounded shadow">
-                <h3 className="text-lg font-semibold mb-4">Record New Produce</h3>
-                <form onSubmit={onSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Crop Type</label>
-                        <input
-                            value={cropType}
-                            onChange={e => setCropType(e.target.value)}
-                            placeholder="e.g., Wheat, Corn, Rice"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Harvest Date</label>
-                        <input
-                            type="date"
-                            value={harvestDate}
-                            onChange={e => setHarvestDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
-                    >
-                        {loading ? "Recording..." : "Record Produce"}
-                    </button>
-                </form>
-            </div>
-
-            {/* Produce List */}
-            <div className="bg-white p-6 rounded shadow">
-                <h3 className="text-lg font-semibold mb-4">Produce Records</h3>
-                {produceList.length === 0 ? (
-                    <p className="text-gray-500">No produce records found.</p>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="bg-gray-50">
-                                    <th className="border border-gray-300 px-4 py-2 text-left">ID</th>
-                                    <th className="border border-gray-300 px-4 py-2 text-left">Crop Type</th>
-                                    <th className="border border-gray-300 px-4 py-2 text-left">Harvest Date</th>
-                                    <th className="border border-gray-300 px-4 py-2 text-left">Farmer ID</th>
-                                    <th className="border border-gray-300 px-4 py-2 text-left">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {produceList.map((produce) => (
-                                    <tr key={produce.id}>
-                                        <td className="border border-gray-300 px-4 py-2">{produce.id}</td>
-                                        <td className="border border-gray-300 px-4 py-2">{produce.cropType}</td>
-                                        <td className="border border-gray-300 px-4 py-2">{produce.harvestDate}</td>
-                                        <td className="border border-gray-300 px-4 py-2">{produce.farmerId}</td>
-                                        <td className="border border-gray-300 px-4 py-2">
-                                            <span
-                                                className={`px-2 py-1 rounded text-sm ${
-                                                    produce.isCertified
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-yellow-100 text-yellow-800"
-                                                }`}
-                                            >
-                                                {produce.isCertified ? "Certified" : "Pending"}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+            {success && (
+                <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                    Produce recorded successfully! Your transaction has been submitted.
+                </div>
+            )}
+            
+            {error && (
+                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                    {error}
+                </div>
+            )}
+            
+            <form onSubmit={onSubmit} className="space-y-4">
+                <input 
+                    value={cropType} 
+                    onChange={e => setCropType(e.target.value)} 
+                    placeholder="Crop Type (e.g., Maize, Rice, Wheat)" 
+                    className="input"
+                    disabled={loading}
+                    required
+                />
+                <input 
+                    type="date"
+                    value={harvestDate} 
+                    onChange={e => setHarvestDate(e.target.value)} 
+                    placeholder="Harvest Date" 
+                    className="input"
+                    disabled={loading}
+                    required
+                />
+                <LoadingButton 
+                    type="submit" 
+                    className="btn"
+                    loading={loading}
+                    loadingText="Recording..."
+                >
+                    Record Produce
+                </LoadingButton>
+            </form>
+            
+            <div className="mt-6 text-sm text-gray-600">
+                <p><strong>Note:</strong> You must be a registered and verified farmer to record produce.</p>
             </div>
         </div>
     );
