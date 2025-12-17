@@ -14,7 +14,7 @@ const { publicClient } = configureChains(chains, [publicProvider()]);
 
 // configure AppKit
 const appKit = createAppKit({
-    projectId: process.env.REACT_APP_REOWN_PROJECT_ID || "",
+    projectId: import.meta.env.VITE_REOWN_PROJECT_ID || "",
     chains
 });
 
