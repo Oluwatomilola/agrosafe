@@ -5,11 +5,48 @@
     "type": "constructor"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
-      { "indexed": true, "internalType": "uint256", "name": "farmerId", "type": "uint256" },
-      { "indexed": false, "internalType": "string", "name": "name", "type": "string" },
-      { "indexed": true, "internalType": "address", "name": "wallet", "type": "address" }
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
     ],
     "name": "FarmerRegistered",
     "type": "event"
@@ -17,8 +54,18 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": true, "internalType": "uint256", "name": "farmerId", "type": "uint256" },
-      { "indexed": false, "internalType": "bool", "name": "status", "type": "bool" }
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "status",
+        "type": "bool"
+      }
     ],
     "name": "FarmerVerified",
     "type": "event"
@@ -26,56 +73,78 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": true, "internalType": "uint256", "name": "produceId", "type": "uint256" },
-      { "indexed": true, "internalType": "uint256", "name": "farmerId", "type": "uint256" },
-      { "indexed": false, "internalType": "string", "name": "cropType", "type": "string" }
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
     ],
-    "name": "ProduceRecorded",
+    "name": "OwnershipTransferred",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": true, "internalType": "uint256", "name": "produceId", "type": "uint256" },
-      { "indexed": false, "internalType": "bool", "name": "certified", "type": "bool" }
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "certified",
+        "type": "bool"
+      }
     ],
     "name": "ProduceCertified",
     "type": "event"
   },
   {
+    "anonymous": false,
     "inputs": [
-      { "internalType": "uint256", "name": "farmerId", "type": "uint256" },
-      { "internalType": "bool", "name": "status", "type": "bool" }
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "farmerId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "cropType",
+        "type": "string"
+      }
     ],
-    "name": "verifyFarmer",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "name": "ProduceRecorded",
+    "type": "event"
   },
   {
     "inputs": [
-      { "internalType": "string", "name": "name", "type": "string" },
-      { "internalType": "string", "name": "location", "type": "string" }
-    ],
-    "name": "registerFarmer",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "string", "name": "cropType", "type": "string" },
-      { "internalType": "string", "name": "harvestDate", "type": "string" }
-    ],
-    "name": "recordProduce",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "produceId", "type": "uint256" },
-      { "internalType": "bool", "name": "status", "type": "bool" }
+      {
+        "internalType": "uint256",
+        "name": "produceId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "certified",
+        "type": "bool"
+      }
     ],
     "name": "certifyProduce",
     "outputs": [],
@@ -83,10 +152,17 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "wallet", "type": "address" }
+    "inputs": [],
+    "name": "totalFarmers",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
     ],
-    "name": "farmerIdsByWallet",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalProduce",
     "outputs": [
       { "internalType": "uint256", "name": "", "type": "uint256" }
     ],
@@ -95,32 +171,212 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "farmerId", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
     ],
-    "name": "farmers",
+    "name": "farmerIdsByWallet",
     "outputs": [
-      { "internalType": "uint256", "name": "id", "type": "uint256" },
-      { "internalType": "string", "name": "name", "type": "string" },
-      { "internalType": "address", "name": "wallet", "type": "address" },
-      { "internalType": "string", "name": "location", "type": "string" },
-      { "internalType": "bool", "name": "verified", "type": "bool" }
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "produceId", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "farmers",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "location",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "verified",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
     ],
     "name": "produce",
     "outputs": [
-      { "internalType": "uint256", "name": "id", "type": "uint256" },
-      { "internalType": "string", "name": "cropType", "type": "string" },
-      { "internalType": "string", "name": "harvestDate", "type": "string" },
-      { "internalType": "uint256", "name": "farmerId", "type": "uint256" },
-      { "internalType": "bool", "name": "certified", "type": "bool" }
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "farmerId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "cropType",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "harvestDate",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "certified",
+        "type": "bool"
+      }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "cropType",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "harvestDate",
+        "type": "string"
+      }
+    ],
+    "name": "recordProduce",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "location",
+        "type": "string"
+      }
+    ],
+    "name": "registerFarmer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalFarmers",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalProduce",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "farmerId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "status",
+        "type": "bool"
+      }
+    ],
+    "name": "verifyFarmer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]
