@@ -9,12 +9,18 @@ import { foundry } from "viem/chains"; // example chain; replace if using Base S
 import { createAppKit } from "@reown/appkit";
 import { appKitWagmi } from "@reown/appkit/wagmi";
 
+// Environment variable validation
+const REOWN_PROJECT_ID = import.meta.env.VITE_REOWN_PROJECT_ID;
+if (!REOWN_PROJECT_ID) {
+    throw new Error("Missing VITE_REOWN_PROJECT_ID environment variable. Please set it in your .env file.");
+}
+
 const chains = [foundry]; // replace with chain you use, e.g., baseSepolia (if viem has it)
 const { publicClient } = configureChains(chains, [publicProvider()]);
 
-// configure AppKit
+// configure AppKit with validated project ID
 const appKit = createAppKit({
-    projectId: import.meta.env.VITE_REOWN_PROJECT_ID || "",
+    projectId: REOWN_PROJECT_ID,
     chains
 });
 
