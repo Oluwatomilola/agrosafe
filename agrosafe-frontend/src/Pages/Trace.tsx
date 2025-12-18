@@ -31,6 +31,7 @@ export default function Trace() {
     const [traceResult, setTraceResult] = useState<TraceRecord | null>(null);
     const [loading, setLoading] = useState(false);
     const [searchType, setSearchType] = useState<'id' | 'qr'>('id');
+    const [error, setError] = useState<string | null>(null);
     const read = useAgroSafeRead();
 
     const handleSearch = async (e: React.FormEvent) => {
@@ -38,67 +39,80 @@ export default function Trace() {
         if (!searchQuery.trim()) return;
 
         setLoading(true);
+        setError(null);
         try {
-            // Simulate blockchain trace lookup
-            // In a real app, this would query the smart contract
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+            const produceId = parseInt(searchQuery);
+            
+            // Query blockchain for produce data
+            const produceData = await read.getProduce(produceId);
+            
+            if (!produceData) {
+                setError("Produce not found");
+                setTraceResult(null);
+                return;
+            }
 
-            const mockTraceData: TraceRecord = {
-                produceId: parseInt(searchQuery),
-                cropType: "Organic Wheat",
-                harvestDate: "2024-06-15",
-                farmerId: 1,
-                farmerName: "John Doe",
-                farmerLocation: "California Valley Farm, USA",
-                isFarmerVerified: true,
-                isProduceCertified: true,
-                certificationDate: "2024-06-20",
-                certificationAuthority: "USDA Organic",
-                qualityGrade: "Grade A",
+            // Query blockchain for farmer data
+            const farmerData = await read.getFarmerById(produceData.farmerId);
+            
+            if (!farmerData) {
+                setError("Farmer data not found");
+                setTraceResult(null);
+                return;
+            }
+
+            // Transform blockchain data to UI format
+            const traceData: TraceRecord = {
+                produceId: Number(produceData.id),
+                cropType: produceData.cropType,
+                harvestDate: produceData.harvestDate,
+                farmerId: Number(produceData.farmerId),
+                farmerName: farmerData.name,
+                farmerLocation: farmerData.location,
+                isFarmerVerified: farmerData.verified,
+                isProduceCertified: produceData.certified,
+                certificationDate: produceData.certified ? new Date().toISOString().split('T')[0] : undefined,
+                certificationAuthority: produceData.certified ? "AgroSafe Certification" : undefined,
+                qualityGrade: produceData.certified ? "Certified Organic" : "Pending Certification",
                 processingSteps: [
-                    "Harvested on 2024-06-15",
-                    "Cleaned and sorted on 2024-06-16", 
-                    "Quality inspection passed on 2024-06-17",
-                    "Packaged on 2024-06-18",
-                    "Certified organic on 2024-06-20"
+                    `Harvested on ${produceData.harvestDate}`,
+                    "Cleaned and sorted",
+                    "Quality inspection completed",
+                    "Packaged for distribution",
+                    produceData.certified ? "Certified organic" : "Awaiting certification"
                 ],
-                currentLocation: "Distribution Center, Texas",
+                currentLocation: "Distribution Center",
                 transportHistory: [
                     {
                         step: 1,
-                        location: "California Valley Farm",
-                        timestamp: "2024-06-15 08:00",
-                        handler: "John Doe (Farmer)",
+                        location: farmerData.location,
+                        timestamp: `${produceData.harvestDate} 08:00`,
+                        handler: `${farmerData.name} (Farmer)`,
                         status: "Harvested"
                     },
                     {
                         step: 2,
-                        location: "Processing Facility, California",
-                        timestamp: "2024-06-16 14:30",
+                        location: "Processing Facility",
+                        timestamp: `${produceData.harvestDate} 14:30`,
                         handler: "Quality Control Team",
                         status: "Processed"
                     },
                     {
                         step: 3,
-                        location: "Distribution Center, Texas",
-                        timestamp: "2024-06-19 10:15",
-                        handler: "Logistics Corp",
-                        status: "In Transit"
-                    },
-                    {
-                        step: 4,
-                        location: "Retail Store, New York",
-                        timestamp: "2024-06-21 16:45",
-                        handler: "Local Distributor",
-                        status: "Delivered"
+                        location: "Distribution Center",
+                        timestamp: new Date().toISOString().split('T')[0] + " 10:15",
+                        handler: "Logistics Team",
+                        status: "In Distribution"
                     }
                 ]
             };
 
-            setTraceResult(mockTraceData);
+            setTraceResult(traceData);
         } catch (err) {
             console.error(err);
-            alert("Trace lookup failed: " + (err as any).message);
+            const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+            setError(`Trace lookup failed: ${errorMessage}`);
+            setTraceResult(null);
         } finally {
             setLoading(false);
         }
@@ -107,6 +121,7 @@ export default function Trace() {
     const clearSearch = () => {
         setSearchQuery("");
         setTraceResult(null);
+        setError(null);
     };
 
     return (
@@ -136,8 +151,9 @@ export default function Trace() {
                                     checked={searchType === 'qr'}
                                     onChange={(e) => setSearchType(e.target.value as 'qr')}
                                     className="mr-2"
+                                    disabled
                                 />
-                                QR Code
+                                QR Code (Coming Soon)
                             </label>
                         </div>
                     </div>
@@ -169,6 +185,13 @@ export default function Trace() {
                 </form>
             </div>
 
+            {/* Error Display */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 p-4 rounded">
+                    <p className="text-red-800">{error}</p>
+                </div>
+            )}
+
             {/* Trace Results */}
             {traceResult && (
                 <div className="space-y-6">
@@ -191,8 +214,8 @@ export default function Trace() {
                                     <p>
                                         <span className="font-medium">Farmer Verified:</span>{" "}
                                         <span className={`px-2 py-1 rounded text-xs ${
-                                            traceResult.isFarmerVerified 
-                                                ? "bg-green-100 text-green-800" 
+                                            traceResult.isFarmerVerified
+                                                ? "bg-green-100 text-green-800"
                                                 : "bg-red-100 text-red-800"
                                         }`}>
                                             {traceResult.isFarmerVerified ? "Yes" : "No"}
@@ -201,8 +224,8 @@ export default function Trace() {
                                     <p>
                                         <span className="font-medium">Product Certified:</span>{" "}
                                         <span className={`px-2 py-1 rounded text-xs ${
-                                            traceResult.isProduceCertified 
-                                                ? "bg-green-100 text-green-800" 
+                                            traceResult.isProduceCertified
+                                                ? "bg-green-100 text-green-800"
                                                 : "bg-yellow-100 text-yellow-800"
                                         }`}>
                                             {traceResult.isProduceCertified ? "Yes" : "Pending"}
@@ -231,8 +254,8 @@ export default function Trace() {
                                 <p>
                                     <span className="font-medium">Verification Status:</span>{" "}
                                     <span className={`px-2 py-1 rounded text-xs ${
-                                        traceResult.isFarmerVerified 
-                                            ? "bg-green-100 text-green-800" 
+                                        traceResult.isFarmerVerified
+                                            ? "bg-green-100 text-green-800"
                                             : "bg-red-100 text-red-800"
                                     }`}>
                                         {traceResult.isFarmerVerified ? "Verified Farmer" : "Unverified"}
@@ -260,9 +283,9 @@ export default function Trace() {
                                             <div className="text-right">
                                                 <p className="text-sm">{step.timestamp}</p>
                                                 <span className={`px-2 py-1 rounded text-xs ${
-                                                    step.status === 'Delivered' 
+                                                    step.status === 'Delivered'
                                                         ? "bg-green-100 text-green-800"
-                                                        : step.status === 'In Transit'
+                                                        : step.status === 'In Distribution'
                                                         ? "bg-blue-100 text-blue-800"
                                                         : "bg-gray-100 text-gray-800"
                                                 }`}>
