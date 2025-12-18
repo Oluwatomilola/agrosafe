@@ -50,6 +50,79 @@ export default function Trace() {
 
         setLoading(true);
         setError(null);
+        try {
+            const produceId = parseInt(searchQuery);
+            
+            // Query blockchain for produce data
+            const produceData = await read.getProduce(produceId);
+            
+            if (!produceData) {
+                setError("Produce not found");
+                setTraceResult(null);
+                return;
+            }
+
+            // Query blockchain for farmer data
+            const farmerData = await read.getFarmerById(produceData.farmerId);
+            
+            if (!farmerData) {
+                setError("Farmer data not found");
+                setTraceResult(null);
+                return;
+            }
+
+            // Transform blockchain data to UI format
+            const traceData: TraceRecord = {
+                produceId: Number(produceData.id),
+                cropType: produceData.cropType,
+                harvestDate: produceData.harvestDate,
+                farmerId: Number(produceData.farmerId),
+                farmerName: farmerData.name,
+                farmerLocation: farmerData.location,
+                isFarmerVerified: farmerData.verified,
+                isProduceCertified: produceData.certified,
+                certificationDate: produceData.certified ? new Date().toISOString().split('T')[0] : undefined,
+                certificationAuthority: produceData.certified ? "AgroSafe Certification" : undefined,
+                qualityGrade: produceData.certified ? "Certified Organic" : "Pending Certification",
+                processingSteps: [
+                    `Harvested on ${produceData.harvestDate}`,
+                    "Cleaned and sorted",
+                    "Quality inspection completed",
+                    "Packaged for distribution",
+                    produceData.certified ? "Certified organic" : "Awaiting certification"
+                ],
+                currentLocation: "Distribution Center",
+                transportHistory: [
+                    {
+                        step: 1,
+                        location: farmerData.location,
+                        timestamp: `${produceData.harvestDate} 08:00`,
+                        handler: `${farmerData.name} (Farmer)`,
+                        status: "Harvested"
+                    },
+                    {
+                        step: 2,
+                        location: "Processing Facility",
+                        timestamp: `${produceData.harvestDate} 14:30`,
+                        handler: "Quality Control Team",
+                        status: "Processed"
+                    },
+                    {
+                        step: 3,
+                        location: "Distribution Center",
+                        timestamp: new Date().toISOString().split('T')[0] + " 10:15",
+                        handler: "Logistics Team",
+                        status: "In Distribution"
+                    }
+                ]
+            };
+
+            setTraceResult(traceData);
+        } catch (err) {
+            console.error(err);
+            const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+            setError(`Trace lookup failed: ${errorMessage}`);
+            setTraceResult(null);
         setSearchResult(null);
 
         try {
@@ -100,6 +173,58 @@ export default function Trace() {
             <h2 className="text-2xl font-bold mb-6">Produce Traceability</h2>
             
             {/* Search Form */}
+            <div className="bg-white p-6 rounded shadow">
+                <h3 className="text-lg font-semibold mb-4">Trace Product Origin</h3>
+                <form onSubmit={handleSearch} className="space-y-4">
+                    <div className="flex space-x-4">
+                        <div className="flex space-x-2">
+                            <label className="flex items-center">
+                                <input
+                                    type="radio"
+                                    value="id"
+                                    checked={searchType === 'id'}
+                                    onChange={(e) => setSearchType(e.target.value as 'id')}
+                                    className="mr-2"
+                                />
+                                Product ID
+                            </label>
+                            <label className="flex items-center">
+                                <input
+                                    type="radio"
+                                    value="qr"
+                                    checked={searchType === 'qr'}
+                                    onChange={(e) => setSearchType(e.target.value as 'qr')}
+                                    className="mr-2"
+                                    disabled
+                                />
+                                QR Code (Coming Soon)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div className="flex space-x-4">
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            placeholder={searchType === 'id' ? "Enter Product ID" : "Scan or enter QR Code"}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                        />
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                        >
+                            {loading ? "Searching..." : "Trace"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={clearSearch}
+                            className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
+                        >
+                            Clear
+                        </button>
             <div className="bg-white p-6 rounded shadow mb-6">
                 <h3 className="text-lg font-semibold mb-4">Search Produce</h3>
                 

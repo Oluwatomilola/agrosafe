@@ -17,7 +17,6 @@ export default function Produce() {
     const [harvestDate, setHarvestDate] = useState("");
     const [loading, setLoading] = useState(false);
     const write = useAgroSafeWrite();
-    const read = useAgroSafeRead();
     const [success, setSuccess] = useState(false);
 
     const onSubmit = async (e: React.FormEvent) => {
@@ -84,8 +83,8 @@ export default function Produce() {
                         />
                     </div>
                     
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         disabled={loading}
                         className="btn w-full"
                     >
