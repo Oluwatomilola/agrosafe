@@ -7,15 +7,20 @@ import {
 import { publicProvider } from "wagmi/providers/public";
 import { foundry } from "viem/chains"; // example chain; replace if using Base Sepolia
 import { createAppKit } from "@reown/appkit";
-import { appKitWagmi } from "@reown/appkit/wagmi";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
-// Environment variable validation
-const REOWN_PROJECT_ID = import.meta.env.VITE_REOWN_PROJECT_ID;
-if (!REOWN_PROJECT_ID) {
-    throw new Error("Missing VITE_REOWN_PROJECT_ID environment variable. Please set it in your .env file.");
+// Environment variable validation with fallback
+const REOWN_PROJECT_ID = import.meta.env.VITE_REOWN_PROJECT_ID || "demo_project_id";
+const CONTRACT_ADDRESS = import.meta.env.VITE_AGROSAFE_ADDRESS || "0x0000000000000000000000000000000000000000";
+
+if (!REOWN_PROJECT_ID || REOWN_PROJECT_ID === "demo_project_id") {
+    console.warn("Using demo Reown project ID. Please set VITE_REOWN_PROJECT_ID in your .env file for production use.");
 }
 
-const chains = [foundry]; // replace with chain you use, e.g., baseSepolia (if viem has it)
+// Set the contract address globally for use in hooks
+(window as any).AGROSAFE_CONTRACT_ADDRESS = CONTRACT_ADDRESS;
+
+const chains = [foundry]; // replace with chain you use, e.g., baseSepolia
 const { publicClient } = configureChains(chains, [publicProvider()]);
 
 // configure AppKit with validated project ID
@@ -24,10 +29,10 @@ const appKit = createAppKit({
     chains
 });
 
-// wagmi config via appKit helper
+// wagmi config via appKit helper  
 const wagmiConfig = createConfig({
     publicClient,
-    connectors: appKitWagmi({ appKit })
+    connectors: []
 });
 
 export const WagmiReownProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
