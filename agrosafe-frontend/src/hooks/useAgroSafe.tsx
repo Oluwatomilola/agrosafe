@@ -36,6 +36,13 @@ export function useAgroSafeRead() {
                 functionName: "produce",
                 args: [id]
             });
+        },
+        async totalProduce() {
+            return publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: AgroSafeABI as any,
+                functionName: "totalProduce"
+            });
         }
     };
 }
