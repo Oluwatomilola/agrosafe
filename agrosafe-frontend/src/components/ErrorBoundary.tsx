@@ -1,5 +1,4 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { logError } from '../utils/errorLogging';
 
 interface ErrorBoundaryProps {
   children?: ReactNode;
@@ -21,22 +20,6 @@ interface ErrorBoundaryState {
  * 
  * This component catches JavaScript errors anywhere in the child component tree,
  * logs those errors, and displays a fallback UI instead of the component tree that crashed.
- * 
- * Features:
- * - Catches rendering errors in child components
- * - Provides customizable fallback UI based on error level
- * - Supports custom error handling via onError callback
- * - Logs errors to console for debugging
- * - Different UI variants for different error contexts
- * 
- * @param props - Component props
- * @param props.children - Child components to wrap with error boundary
- * @param props.fallback - Custom fallback UI to display on error
- * @param props.onError - Callback function to handle errors
- * @param props.level - Error level for appropriate styling ('page', 'component', 'section')
- * @param props.title - Custom title for the error display
- * @param props.description - Custom description for the error display
- * @returns Error boundary component or children if no error
  */
 export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public state: ErrorBoundaryState = {
@@ -44,46 +27,20 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   };
 
   public static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    // Update state so the next render will show the fallback UI
     return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log the error using our comprehensive logging system
-    const level = this.props.level || 'component';
-    const category = this.getErrorCategory();
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
     
-    logError(
-      category,
-      `ErrorBoundary caught an error (${level} level)`,
-      error,
-      {
-        level,
-        componentStack: errorInfo.componentStack,
-        errorBoundary: 'ErrorBoundary'
-      }
-    );
-    
-    // Update state with error details
     this.setState({
       error,
       errorInfo
     });
 
-    // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
-  }
-
-  private getErrorCategory(): 'component' | 'routing' | 'web3' | 'network' | 'unknown' {
-    const level = this.props.level;
-    
-    // Infer category based on error level and context
-    if (level === 'page') return 'routing';
-    if (level === 'component') return 'component';
-    
-    return 'unknown';
   }
 
   private handleRetry = () => {
@@ -91,9 +48,9 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   };
 
   private getDefaultFallback() {
-    const { level = 'component', title, description } = this.props;
+    const level = this.props.level || 'component';
     const { error } = this.state;
-
+    
     const isDevelopment = process.env.NODE_ENV === 'development';
     
     const baseClasses = "flex flex-col items-center justify-center p-6 rounded-lg border";
@@ -110,14 +67,14 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     };
 
     return (
-      <div className={`${baseClasses} ${levelClasses[level]}`}>
+      <div className={`${baseClasses} ${levelClasses[level as keyof typeof levelClasses]}`}>
         <div className="text-center max-w-md">
           <div className="text-4xl mb-4">⚠️</div>
           <h2 className="text-xl font-semibold mb-2 text-gray-800">
-            {title || titleMap[level]}
+            {this.props.title || titleMap[level as keyof typeof titleMap]}
           </h2>
           <p className="text-gray-600 mb-4">
-            {description || "An unexpected error occurred. Please try again."}
+            {this.props.description || "An unexpected error occurred. Please try again."}
           </p>
           
           {error && (
@@ -155,7 +112,6 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   public render() {
     if (this.state.hasError) {
-      // Return custom fallback UI or default fallback
       return this.props.fallback || this.getDefaultFallback();
     }
 
