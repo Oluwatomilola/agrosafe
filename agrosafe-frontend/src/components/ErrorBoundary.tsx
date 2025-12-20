@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { logError } from '../utils/errorLogging';
 
 interface ErrorBoundaryProps {
   children?: ReactNode;
@@ -48,8 +49,20 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log the error to console and any error reporting service
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Log the error using our comprehensive logging system
+    const level = this.props.level || 'component';
+    const category = this.getErrorCategory();
+    
+    logError(
+      category,
+      `ErrorBoundary caught an error (${level} level)`,
+      error,
+      {
+        level,
+        componentStack: errorInfo.componentStack,
+        errorBoundary: 'ErrorBoundary'
+      }
+    );
     
     // Update state with error details
     this.setState({
@@ -61,6 +74,16 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
+  }
+
+  private getErrorCategory(): 'component' | 'routing' | 'web3' | 'network' | 'unknown' {
+    const level = this.props.level;
+    
+    // Infer category based on error level and context
+    if (level === 'page') return 'routing';
+    if (level === 'component') return 'component';
+    
+    return 'unknown';
   }
 
   private handleRetry = () => {
