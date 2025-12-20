@@ -5,7 +5,7 @@ import {
     WagmiConfig
 } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
-import { foundry } from "viem/chains"; // example chain; replace if using Base Sepolia
+import { base } from "viem/chains";
 import { createAppKit } from "@reown/appkit";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
@@ -22,19 +22,32 @@ if (!REOWN_PROJECT_ID || REOWN_PROJECT_ID === "demo_project_id") {
 
 const chains = [foundry]; // replace with chain you use, e.g., baseSepolia
 const { publicClient } = configureChains(chains, [publicProvider()]);
+// Configure chains
+const { publicClient, webSocketPublicClient } = configureChains(
+  [base],
+  [publicProvider()]
+);
 
-// configure AppKit with validated project ID
+// Initialize AppKit
 const appKit = createAppKit({
-    projectId: REOWN_PROJECT_ID,
-    chains
+    projectId: import.meta.env.VITE_REOWN_PROJECT_ID || "",
+    chains: [celo],
 });
 
-// wagmi config via appKit helper  
-const wagmiConfig = createConfig({
-    publicClient,
-    connectors: []
+// Create wagmi config with AppKit connectors
+const config = createConfig({
+  autoConnect: true,
+  publicClient,
+  webSocketPublicClient,
+  connectors: appKitWagmi({ appKit }),
 });
 
-export const WagmiReownProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>;
+interface WagmiReownProviderProps {
+  children: React.ReactNode;
+}
+
+export const WagmiReownProvider: React.FC<WagmiReownProviderProps> = ({ 
+  children 
+}) => {
+  return <WagmiConfig config={config}>{children}</WagmiConfig>;
 };
