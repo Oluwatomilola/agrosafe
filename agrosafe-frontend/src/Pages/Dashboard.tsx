@@ -1,24 +1,71 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { useAgroSafeRead } from "../hooks/useAgroSafe";
 
 export default function Dashboard() {
+    const { isConnected } = useAccount();
+    const agroSafeRead = useAgroSafeRead();
+    const [totalFarmers, setTotalFarmers] = useState<number | null>(null);
+    const [totalProduce, setTotalProduce] = useState<number | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true);
+                setError(null);
+                
+                const [farmersCount, produceCount] = await Promise.all([
+                    agroSafeRead.getTotalFarmers(),
+                    agroSafeRead.getTotalProduce()
+                ]);
+                
+                setTotalFarmers(Number(farmersCount));
+                setTotalProduce(Number(produceCount));
+            } catch (err) {
+                console.error('Error fetching dashboard data:', err);
+                setError('Failed to load dashboard data');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        if (isConnected) {
+            fetchData();
+        } else {
+            setLoading(false);
+        }
+    }, [isConnected, agroSafeRead]);
+
     return (
         <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">AgroSafe Dashboard</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 bg-white rounded shadow">
                     <h3 className="text-sm text-gray-600">Total Farmers</h3>
-                    <div className="text-xl font-bold text-blue-600">—</div>
-                    <p className="text-xs text-gray-500 mt-1">Coming Soon</p>
+                    <div className="text-xl font-bold text-blue-600">
+                        {loading ? 'Loading...' : error ? 'Error' : (totalFarmers ?? 0)}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                        {isConnected ? 'Active users' : 'Connect wallet to view'}
+                    </p>
                 </div>
                 <div className="p-4 bg-white rounded shadow">
                     <h3 className="text-sm text-gray-600">Total Produce</h3>
-                    <div className="text-xl font-bold text-green-600">—</div>
-                    <p className="text-xs text-gray-500 mt-1">Coming Soon</p>
+                    <div className="text-xl font-bold text-green-600">
+                        {loading ? 'Loading...' : error ? 'Error' : (totalProduce ?? 0)}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                        {isConnected ? 'Recorded items' : 'Connect wallet to view'}
+                    </p>
                 </div>
                 <div className="p-4 bg-white rounded shadow">
                     <h3 className="text-sm text-gray-600">Certified Products</h3>
-                    <div className="text-xl font-bold text-purple-600">—</div>
-                    <p className="text-xs text-gray-500 mt-1">Coming Soon</p>
+                    <div className="text-xl font-bold text-purple-600">
+                        {loading ? 'Loading...' : error ? 'Error' : '—'}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Feature coming soon</p>
                 </div>
             </div>
             

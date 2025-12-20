@@ -36,6 +36,28 @@ export function useAgroSafeRead() {
                 functionName: "produce",
                 args: [id]
             });
+        },
+        async getTotalFarmers() {
+            if (!publicClient) {
+                throw new Error("Public client not available");
+            }
+            
+            return publicClient.readContract({
+                address: getContractAddress() as Address,
+                abi: AgroSafeABI as any,
+                functionName: "totalFarmers"
+            });
+        },
+        async getTotalProduce() {
+            if (!publicClient) {
+                throw new Error("Public client not available");
+            }
+            
+            return publicClient.readContract({
+                address: getContractAddress() as Address,
+                abi: AgroSafeABI as any,
+                functionName: "totalProduce"
+            });
         }
     };
 }
