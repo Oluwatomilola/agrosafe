@@ -4,6 +4,7 @@ import { publicProvider } from 'wagmi/providers/public';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { InjectedConnector } from 'wagmi/connectors/injected';
+import { Web3ErrorBoundary } from '../components/Web3ErrorBoundary';
 
 // Configure chains & providers
 const { chains, publicClient, webSocketPublicClient } = configureChains(
@@ -35,5 +36,9 @@ const config = createConfig({
 });
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
-  return <WagmiConfig config={config}>{children}</WagmiConfig>;
+  return (
+    <Web3ErrorBoundary>
+      <WagmiConfig config={config}>{children}</WagmiConfig>
+    </Web3ErrorBoundary>
+  );
 }

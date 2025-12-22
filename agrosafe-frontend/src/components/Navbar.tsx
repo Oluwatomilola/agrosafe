@@ -1,5 +1,6 @@
 import React from 'react';
 import { WalletConnect } from './WalletConnect';
+import ErrorBoundary from './ErrorBoundary';
 
 /**
  * Props for the Navbar component
@@ -21,6 +22,7 @@ interface NavbarProps {
  * - Route switching between Dashboard, Register, Produce, Admin, and Trace pages
  * - Integration with WalletConnect component for Web3 functionality
  * - Semantic HTML with proper ARIA labels for screen readers
+ * - Error boundary protection for navigation and wallet components
  * 
  * @param props - Component props containing setRoute function
  * @returns JSX element representing the navigation bar
@@ -40,46 +42,58 @@ export default function Navbar({ setRoute }: NavbarProps) {
                 <h1 className="text-xl font-bold" aria-label="AgroSafe Application">
                     AgroSafe
                 </h1>
-                <nav className="space-x-3" role="navigation" aria-label="Main navigation">
-                    <button 
-                        onClick={() => handleRouteChange("dashboard")} 
-                        className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-                        aria-label="Go to Dashboard"
-                    >
-                        Dashboard
-                    </button>
-                    <button 
-                        onClick={() => handleRouteChange("register")} 
-                        className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-                        aria-label="Go to Farmer Registration"
-                    >
-                        Register
-                    </button>
-                    <button 
-                        onClick={() => handleRouteChange("produce")} 
-                        className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-                        aria-label="Go to Produce Management"
-                    >
-                        Produce
-                    </button>
-                    <button 
-                        onClick={() => handleRouteChange("admin")} 
-                        className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-                        aria-label="Go to Admin Panel"
-                    >
-                        Admin
-                    </button>
-                    <button 
-                        onClick={() => handleRouteChange("trace")} 
-                        className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-                        aria-label="Go to Traceability"
-                    >
-                        Trace
-                    </button>
-                </nav>
+                <ErrorBoundary 
+                    level="section" 
+                    title="Navigation Error"
+                    description="Unable to load navigation menu"
+                >
+                    <nav className="space-x-3" role="navigation" aria-label="Main navigation">
+                        <button 
+                            onClick={() => handleRouteChange("dashboard")} 
+                            className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                            aria-label="Go to Dashboard"
+                        >
+                            Dashboard
+                        </button>
+                        <button 
+                            onClick={() => handleRouteChange("register")} 
+                            className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                            aria-label="Go to Farmer Registration"
+                        >
+                            Register
+                        </button>
+                        <button 
+                            onClick={() => handleRouteChange("produce")} 
+                            className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                            aria-label="Go to Produce Management"
+                        >
+                            Produce
+                        </button>
+                        <button 
+                            onClick={() => handleRouteChange("admin")} 
+                            className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                            aria-label="Go to Admin Panel"
+                        >
+                            Admin
+                        </button>
+                        <button 
+                            onClick={() => handleRouteChange("trace")} 
+                            className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                            aria-label="Go to Traceability"
+                        >
+                            Trace
+                        </button>
+                    </nav>
+                </ErrorBoundary>
             </div>
             <div className="flex items-center">
-                <WalletConnect />
+                <ErrorBoundary 
+                    level="component" 
+                    title="Wallet Connection Error"
+                    description="Unable to load wallet connection"
+                >
+                    <WalletConnect />
+                </ErrorBoundary>
             </div>
         </header>
     );
