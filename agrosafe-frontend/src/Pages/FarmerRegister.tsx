@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAgroSafeWrite } from "../hooks/useAgroSafe";
+import { LoadingButton } from "../components/Loading";
 
 export default function FarmerRegister() {
     const [name, setName] = useState("");
@@ -53,6 +54,19 @@ export default function FarmerRegister() {
             console.error(err);
             const errorMessage = err instanceof Error ? err.message : "Registration failed";
             setError(errorMessage);
+        setLoading(true);
+        setError(null);
+        setSuccess(false);
+        
+        try {
+            const tx = await write.registerFarmer(name, location);
+            console.log("tx", tx);
+            setSuccess(true);
+            setName("");
+            setLocation("");
+        } catch (err) {
+            console.error(err);
+            setError("Registration failed: " + (err as any).message);
         } finally {
             setLoading(false);
         }
@@ -63,10 +77,8 @@ export default function FarmerRegister() {
             <h2 className="text-lg font-semibold mb-4">Register as Farmer</h2>
             
             {success && (
-                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded">
-                    <p className="text-green-800">
-                        ✅ Registration transaction sent successfully! Your farmer account is being processed.
-                    </p>
+                <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                    Registration successful! Your transaction has been submitted.
                 </div>
             )}
             
