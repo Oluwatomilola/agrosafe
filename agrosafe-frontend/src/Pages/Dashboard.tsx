@@ -3,6 +3,8 @@ import { useAccount } from "wagmi";
 import { useAgroSafeRead } from "../hooks/useAgroSafe";
 
 export default function Dashboard() {
+    const agroSafeRead = useAgroSafeRead();
+    const [total, setTotal] = useState<number | null>(null);
     const { isConnected } = useAccount();
     const agroSafeRead = useAgroSafeRead();
     const [totalFarmers, setTotalFarmers] = useState<number | null>(null);
@@ -13,6 +15,10 @@ export default function Dashboard() {
     useEffect(() => {
         async function fetchData() {
             try {
+                const t = await agroSafeRead.getTotalFarmers();
+                setTotal(Number(t));
+            } catch (e) {
+                console.error(e);
                 setLoading(true);
                 setError(null);
                 
