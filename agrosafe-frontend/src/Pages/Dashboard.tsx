@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useAgroSafeRead } from "../hooks/useAgroSafe";
 
 export default function Dashboard() {
-    const read = useAgroSafeRead();
+    const agroSafeRead = useAgroSafeRead();
     const [total, setTotal] = useState<number | null>(null);
 
     useEffect(() => {
         (async () => {
             try {
-                const t = await read.totalFarmers();
+                const t = await agroSafeRead.getTotalFarmers();
                 setTotal(Number(t));
             } catch (e) {
                 console.error(e);
