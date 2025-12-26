@@ -5,6 +5,9 @@ import { useAgroSafeRead } from "../hooks/useAgroSafe";
 export default function Dashboard() {
     const { isConnected, address } = useAccount();
     const agroSafeRead = useAgroSafeRead();
+    const [total, setTotal] = useState<number | null>(null);
+    const { isConnected } = useAccount();
+    const agroSafeRead = useAgroSafeRead();
     const [totalFarmers, setTotalFarmers] = useState<number | null>(null);
     const [totalProduce, setTotalProduce] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
@@ -37,6 +40,11 @@ export default function Dashboard() {
         }
 
         fetchData();
+        if (isConnected) {
+            fetchData();
+        } else {
+            setLoading(false);
+        }
     }, [isConnected, agroSafeRead]);
 
     return (

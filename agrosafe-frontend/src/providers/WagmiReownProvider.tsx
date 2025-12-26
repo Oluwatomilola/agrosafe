@@ -5,25 +5,49 @@ import {
     WagmiConfig
 } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
-import { foundry } from "viem/chains"; // example chain; replace if using Base Sepolia
+import { base } from "viem/chains";
 import { createAppKit } from "@reown/appkit";
-import { appKitWagmi } from "@reown/appkit/wagmi";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
-const chains = [foundry]; // replace with chain you use, e.g., baseSepolia (if viem has it)
+// Environment variable validation with fallback
+const REOWN_PROJECT_ID = import.meta.env.VITE_REOWN_PROJECT_ID || "demo_project_id";
+const CONTRACT_ADDRESS = import.meta.env.VITE_AGROSAFE_ADDRESS || "0x0000000000000000000000000000000000000000";
+
+if (!REOWN_PROJECT_ID || REOWN_PROJECT_ID === "demo_project_id") {
+    console.warn("Using demo Reown project ID. Please set VITE_REOWN_PROJECT_ID in your .env file for production use.");
+}
+
+// Set the contract address globally for use in hooks
+(window as any).AGROSAFE_CONTRACT_ADDRESS = CONTRACT_ADDRESS;
+
+const chains = [foundry]; // replace with chain you use, e.g., baseSepolia
 const { publicClient } = configureChains(chains, [publicProvider()]);
+// Configure chains
+const { publicClient, webSocketPublicClient } = configureChains(
+  [base],
+  [publicProvider()]
+);
 
-// configure AppKit
+// Initialize AppKit
 const appKit = createAppKit({
-    projectId: process.env.REACT_APP_REOWN_PROJECT_ID || "",
-    chains
+    projectId: import.meta.env.VITE_REOWN_PROJECT_ID || "",
+    chains: [celo],
 });
 
-// wagmi config via appKit helper
-const wagmiConfig = createConfig({
-    publicClient,
-    connectors: appKitWagmi({ appKit })
+// Create wagmi config with AppKit connectors
+const config = createConfig({
+  autoConnect: true,
+  publicClient,
+  webSocketPublicClient,
+  connectors: appKitWagmi({ appKit }),
 });
 
-export const WagmiReownProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>;
+interface WagmiReownProviderProps {
+  children: React.ReactNode;
+}
+
+export const WagmiReownProvider: React.FC<WagmiReownProviderProps> = ({ 
+  children 
+}) => {
+  return <WagmiConfig config={config}>{children}</WagmiConfig>;
 };
