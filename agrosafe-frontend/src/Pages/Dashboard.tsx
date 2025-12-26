@@ -3,6 +3,7 @@ import { useAccount } from "wagmi";
 import { useAgroSafeRead } from "../hooks/useAgroSafe";
 
 export default function Dashboard() {
+    const { isConnected, address } = useAccount();
     const agroSafeRead = useAgroSafeRead();
     const [total, setTotal] = useState<number | null>(null);
     const { isConnected } = useAccount();
@@ -14,11 +15,12 @@ export default function Dashboard() {
 
     useEffect(() => {
         async function fetchData() {
+            if (!isConnected) {
+                setLoading(false);
+                return;
+            }
+            
             try {
-                const t = await agroSafeRead.getTotalFarmers();
-                setTotal(Number(t));
-            } catch (e) {
-                console.error(e);
                 setLoading(true);
                 setError(null);
                 
@@ -37,6 +39,7 @@ export default function Dashboard() {
             }
         }
 
+        fetchData();
         if (isConnected) {
             fetchData();
         } else {
@@ -47,6 +50,7 @@ export default function Dashboard() {
     return (
         <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">AgroSafe Dashboard</h2>
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 bg-white rounded shadow">
                     <h3 className="text-sm text-gray-600">Total Farmers</h3>
@@ -80,13 +84,21 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 border border-gray-200 rounded">
                         <h4 className="font-medium mb-2">Register as Farmer</h4>
-                        <p className="text-sm text-gray-600 mb-3">Join the AgroSafe network to start recording your produce</p>
-                        <button className="btn">Get Started</button>
+                        <p className="text-sm text-gray-600 mb-3">
+                            Join the AgroSafe network to start recording your produce
+                        </p>
+                        <button className="btn btn-primary px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            Get Started
+                        </button>
                     </div>
                     <div className="p-4 border border-gray-200 rounded">
                         <h4 className="font-medium mb-2">Track Products</h4>
-                        <p className="text-sm text-gray-600 mb-3">Use our traceability system to track produce from farm to table</p>
-                        <button className="btn">Trace Now</button>
+                        <p className="text-sm text-gray-600 mb-3">
+                            Use our traceability system to track produce from farm to table
+                        </p>
+                        <button className="btn btn-secondary px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Trace Now
+                        </button>
                     </div>
                 </div>
             </div>
@@ -103,6 +115,26 @@ export default function Dashboard() {
                     <li>• Track products through the entire supply chain</li>
                 </ul>
             </div>
+            
+            {error && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded">
+                    <p className="text-red-800 text-sm">{error}</p>
+                    <button 
+                        onClick={() => window.location.reload()} 
+                        className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+                    >
+                        Retry
+                    </button>
+                </div>
+            )}
+            
+            {!isConnected && (
+                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
+                    <p className="text-yellow-800 text-sm">
+                        Please connect your wallet to access all dashboard features.
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

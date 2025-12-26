@@ -280,6 +280,7 @@ contract AgroSafe is Ownable, ReentrancyGuard, Pausable {
     function registerFarmer(
         string memory name,
         string memory location
+    ) external {
     )
         external
         whenNotPaused
@@ -296,6 +297,14 @@ contract AgroSafe is Ownable, ReentrancyGuard, Pausable {
         require(
             farmerIdsByWallet[msg.sender] == 0,
             "Farmer already registered"
+        );
+        require(
+            bytes(name).length > 0 && bytes(name).length <= 100,
+            "Name must be 1-100 characters"
+        );
+        require(
+            bytes(location).length > 0 && bytes(location).length <= 200,
+            "Location must be 1-200 characters"
         );
 
         _farmerIds++;
@@ -344,6 +353,22 @@ contract AgroSafe is Ownable, ReentrancyGuard, Pausable {
      * @return newProduceId The unique ID of the newly created produce record
      * @dev This function is internal and called by public functions
      */
+    function recordProduce(
+        string memory cropType,
+        string memory harvestDate
+    ) external {
+        uint256 farmerId = farmerIdsByWallet[msg.sender];
+        require(farmerId != 0, "Farmer not registered");
+        require(farmers[farmerId].verified, "Farmer not verified");
+        require(
+            bytes(cropType).length > 0 && bytes(cropType).length <= 100,
+            "Crop type must be 1-100 characters"
+        );
+        require(
+            bytes(harvestDate).length == 10,
+            "Harvest date must be in YYYY-MM-DD format"
+        );
+
     function _createProduce(
         uint256 _farmerId,
         string memory _cropType,
@@ -434,123 +459,33 @@ contract AgroSafe is Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @notice Get a paginated list of farmers
-     * @param offset Starting index (0-based) for pagination
-     * @param limit Maximum number of items to return (max 100)
-     * @return Array of Farmer structs within the specified range
-     * @dev Enables efficient data retrieval for large datasets
-     * @dev Returns empty array if offset is out of bounds
+     * @notice Check if an address is a registered farmer
      */
-    function getFarmersPaginated(
-        uint256 offset,
-        uint256 limit
-    ) external view returns (Farmer[] memory) {
-        require(limit > 0 && limit <= MAX_ITEMS_PER_PAGE, "Invalid limit");
-        require(offset < _farmerIds, "Offset out of bounds");
-
-        uint256 end = offset + limit;
-        if (end > _farmerIds) {
-            end = _farmerIds;
-        }
-
-        Farmer[] memory result = new Farmer[](end - offset);
-
-        uint256 resultIndex = 0;
-        for (uint256 i = offset + 1; i <= end; i++) {
-            result[resultIndex] = farmers[i];
-            resultIndex++;
-        }
-
-        return result;
+    function isFarmerRegistered(address wallet) external view returns (bool) {
+        return farmerIdsByWallet[wallet] != 0;
     }
 
     /**
-     * @notice Get a paginated list of produce items
-     * @param offset Starting index (0-based) for pagination
-     * @param limit Maximum number of items to return (max 100)
-     * @return Array of Produce structs within the specified range
-     * @dev Enables efficient data retrieval for large datasets
-     * @dev Returns empty array if offset is out of bounds
+     * @notice Get total certified produce count
      */
-    function getProducePaginated(
-        uint256 offset,
-        uint256 limit
-    ) external view returns (Produce[] memory) {
-        require(limit > 0 && limit <= MAX_ITEMS_PER_PAGE, "Invalid limit");
-        require(offset < _produceIds, "Offset out of bounds");
-
-        uint256 end = offset + limit;
-        if (end > _produceIds) {
-            end = _produceIds;
-        }
-
-        Produce[] memory result = new Produce[](end - offset);
-
-        uint256 resultIndex = 0;
-        for (uint256 i = offset + 1; i <= end; i++) {
-            result[resultIndex] = produce[i];
-            resultIndex++;
-        }
-
-        return result;
-    }
-
-    /**
-     * @notice Get a paginated list of produce items for a specific farmer
-     * @param farmerId The unique ID of the farmer
-     * @param offset Starting index (0-based) for pagination
-     * @param limit Maximum number of items to return (max 100)
-     * @return Array of Produce structs belonging to the specified farmer
-     * @dev Filters produce by farmer ID and applies pagination
-     * @dev Returns empty array if farmer has no produce or offset is too high
-     */
-    function getProduceByFarmerPaginated(
-        uint256 farmerId,
-        uint256 offset,
-        uint256 limit
-    ) external view returns (Produce[] memory) {
-        require(limit > 0 && limit <= MAX_ITEMS_PER_PAGE, "Invalid limit");
-        require(
-            farmerId != 0 && farmers[farmerId].id != 0,
-            "Invalid farmer ID"
-        );
-
-        // First pass: count matching items
-        uint256 matchCount = 0;
+    function totalCertifiedProduce() external view returns (uint256) {
+        uint256 count = 0;
         for (uint256 i = 1; i <= _produceIds; i++) {
-            if (produce[i].farmerId == farmerId) {
-                if (matchCount >= offset) {
-                    if (matchCount - offset >= limit) break;
-                }
-                matchCount++;
+            if (produce[i].certified) {
+                count++;
             }
         }
+        return count;
+    }
 
-        // Adjust matchCount based on offset and limit
-        if (offset >= matchCount) {
-            return new Produce[](0);
-        }
-
-        uint256 resultSize = matchCount - offset;
-        if (resultSize > limit) {
-            resultSize = limit;
-        }
-
-        // Second pass: collect matching items
-        Produce[] memory result = new Produce[](resultSize);
-        uint256 resultIndex = 0;
-        uint256 currentMatch = 0;
-
-        for (uint256 i = 1; i <= _produceIds && resultIndex < resultSize; i++) {
-            if (produce[i].farmerId == farmerId) {
-                if (currentMatch >= offset) {
-                    result[resultIndex] = produce[i];
-                    resultIndex++;
-                }
-                currentMatch++;
-            }
-        }
-
-        return result;
+    /**
+     * @notice Get farmer info by wallet address
+     */
+    function getFarmerByWallet(
+        address wallet
+    ) external view returns (Farmer memory) {
+        uint256 farmerId = farmerIdsByWallet[wallet];
+        require(farmerId != 0, "Farmer not registered");
+        return farmers[farmerId];
     }
 }
