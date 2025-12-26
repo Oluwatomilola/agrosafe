@@ -1,29 +1,55 @@
 import React from "react";
-import {
-    configureChains,
-    createConfig,
-    WagmiConfig
-} from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
-import { foundry } from "viem/chains"; // example chain; replace if using Base Sepolia
+import { createConfig, http, WagmiProvider } from "wagmi";
+import { mainnet, sepolia } from "wagmi/chains";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppKit } from "@reown/appkit";
 import { appKitWagmi } from "@reown/appkit/wagmi";
 
-const chains = [foundry]; // replace with chain you use, e.g., baseSepolia (if viem has it)
-const { publicClient } = configureChains(chains, [publicProvider()]);
+// Initialize query client for react-query
+const queryClient = new QueryClient();
 
-// configure AppKit
+// Define supported chains
+const chains = [mainnet, sepolia];
+
+// Get project ID from environment
+const projectId = process.env.REACT_APP_REOWN_PROJECT_ID || 
+                 (import.meta as any).env?.VITE_REOWN_PROJECT_ID ||
+                 "";
+
+if (!projectId) {
+    console.warn("Warning: VITE_REOWN_PROJECT_ID is not set");
+}
+
+// Configure AppKit
 const appKit = createAppKit({
-    projectId: process.env.REACT_APP_REOWN_PROJECT_ID || "",
-    chains
+    projectId,
+    chains,
+    metadata: {
+        name: "AgroSafe",
+        description: "A blockchain-based produce traceability platform",
+        url: window.location.origin,
+        icons: []
+    }
 });
 
-// wagmi config via appKit helper
+// Configure wagmi
 const wagmiConfig = createConfig({
-    publicClient,
+    chains,
+    transports: {
+        [mainnet.id]: http(),
+        [sepolia.id]: http()
+    },
     connectors: appKitWagmi({ appKit })
 });
 
-export const WagmiReownProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>;
+export const WagmiReownProvider: React.FC<{ children: React.ReactNode }> = ({ 
+    children 
+}) => {
+    return (
+        <WagmiProvider config={wagmiConfig}>
+            <QueryClientProvider client={queryClient}>
+                {children}
+            </QueryClientProvider>
+        </WagmiProvider>
+    );
 };
