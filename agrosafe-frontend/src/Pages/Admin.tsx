@@ -2,194 +2,165 @@ import React, { useState, useEffect } from "react";
 import { useAgroSafeRead, useAgroSafeWrite } from "../hooks/useAgroSafe";
 
 export default function Admin() {
-    const [selectedFarmerId, setSelectedFarmerId] = useState("");
-    const [selectedProduceId, setSelectedProduceId] = useState("");
-    const [farmerData, setFarmerData] = useState<any>(null);
-    const [produceData, setProduceData] = useState<any>(null);
-    const [loading, setLoading] = useState(false);
-    const read = useAgroSafeRead();
-    const write = useAgroSafeWrite();
+    const [farmerId, setFarmerId] = useState("");
+    const [verifyStatus, setVerifyStatus] = useState(false);
+    const [produceId, setProduceId] = useState("");
+    const [certifyStatus, setCertifyStatus] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const { verifyFarmer, certifyProduce } = useAgroSafeWrite();
 
-    const fetchFarmerData = async () => {
-        if (!selectedFarmerId) return;
-        try {
-            const data = await read.getFarmerById(parseInt(selectedFarmerId));
-            setFarmerData(data);
-        } catch (err) {
-            console.error(err);
-            setFarmerData(null);
+    const handleVerifyFarmer = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+
+        if (!farmerId.trim()) {
+            setError("Farmer ID is required");
+            return;
         }
-    };
 
-    const fetchProduceData = async () => {
-        if (!selectedProduceId) return;
         try {
-            const data = await read.getProduce(parseInt(selectedProduceId));
-            setProduceData(data);
+            setIsLoading(true);
+            const tx = await verifyFarmer(Number(farmerId), verifyStatus);
+            console.log("Transaction hash:", tx);
+            setSuccess(`Farmer ${verifyStatus ? "verified" : "unverified"} successfully! Transaction: ${tx}`);
+            setFarmerId("");
+            setVerifyStatus(false);
         } catch (err) {
-            console.error(err);
-            setProduceData(null);
-        }
-    };
-
-    useEffect(() => {
-        fetchFarmerData();
-    }, [selectedFarmerId]);
-
-    useEffect(() => {
-        fetchProduceData();
-    }, [selectedProduceId]);
-
-    const verifyFarmer = async (verified: boolean) => {
-        if (!selectedFarmerId) return;
-        setLoading(true);
-        try {
-            await write.verifyFarmer(parseInt(selectedFarmerId), verified);
-            alert(`Farmer ${verified ? "verified" : "unverified"} successfully!`);
-            fetchFarmerData(); // Refresh data
-        } catch (err) {
-            console.error(err);
-            alert("Operation failed: " + (err as any).message);
+            console.error("Verify farmer error:", err);
+            const errorMessage = (err as any)?.message || "Unknown error occurred";
+            setError("Failed to verify farmer: " + errorMessage);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
-    const certifyProduce = async (certified: boolean) => {
-        if (!selectedProduceId) return;
-        setLoading(true);
+    const handleCertifyProduce = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+
+        if (!produceId.trim()) {
+            setError("Produce ID is required");
+            return;
+        }
+
         try {
-            await write.certifyProduce(parseInt(selectedProduceId), certified);
-            alert(`Produce ${certified ? "certified" : "uncertified"} successfully!`);
-            fetchProduceData(); // Refresh data
+            setIsLoading(true);
+            const tx = await certifyProduce(Number(produceId), certifyStatus);
+            console.log("Transaction hash:", tx);
+            setSuccess(`Produce ${certifyStatus ? "certified" : "uncertified"} successfully! Transaction: ${tx}`);
+            setProduceId("");
+            setCertifyStatus(false);
         } catch (err) {
-            console.error(err);
-            alert("Operation failed: " + (err as any).message);
+            console.error("Certify produce error:", err);
+            const errorMessage = (err as any)?.message || "Unknown error occurred";
+            setError("Failed to certify produce: " + errorMessage);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            <h2 className="text-2xl font-bold">Admin Panel</h2>
-            
-            {/* Farmer Management */}
-            <div className="bg-white p-6 rounded shadow">
-                <h3 className="text-lg font-semibold mb-4">Farmer Verification</h3>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Farmer ID</label>
-                        <input
-                            type="number"
-                            value={selectedFarmerId}
-                            onChange={e => setSelectedFarmerId(e.target.value)}
-                            placeholder="Enter Farmer ID"
-                            className="input"
-                        />
-                    </div>
-                    
-                    {farmerData && (
-                        <div className="border rounded p-4 bg-gray-50">
-                            <h4 className="font-medium mb-2">Farmer Details</h4>
-                            <p><strong>ID:</strong> {farmerData.id?.toString()}</p>
-                            <p><strong>Name:</strong> {farmerData.name}</p>
-                            <p><strong>Location:</strong> {farmerData.location}</p>
-                            <p><strong>Wallet:</strong> {farmerData.wallet}</p>
-                            <p>
-                                <strong>Status:</strong>{" "}
-                                <span className={`px-2 py-1 rounded text-xs ${
-                                    farmerData.verified 
-                                        ? "bg-green-100 text-green-800" 
-                                        : "bg-yellow-100 text-yellow-800"
-                                }`}>
-                                    {farmerData.verified ? "Verified" : "Unverified"}
-                                </span>
-                            </p>
-                            
-                            <div className="mt-4 space-x-2">
-                                <button
-                                    onClick={() => verifyFarmer(true)}
-                                    disabled={loading || farmerData.verified}
-                                    className="btn"
-                                >
-                                    Verify Farmer
-                                </button>
-                                <button
-                                    onClick={() => verifyFarmer(false)}
-                                    disabled={loading || !farmerData.verified}
-                                    className="btn bg-red-600 hover:bg-red-700"
-                                >
-                                    Unverify Farmer
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
+        <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
 
-            {/* Produce Management */}
-            <div className="bg-white p-6 rounded shadow">
-                <h3 className="text-lg font-semibold mb-4">Produce Certification</h3>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Produce ID</label>
-                        <input
-                            type="number"
-                            value={selectedProduceId}
-                            onChange={e => setSelectedProduceId(e.target.value)}
-                            placeholder="Enter Produce ID"
-                            className="input"
-                        />
-                    </div>
-                    
-                    {produceData && (
-                        <div className="border rounded p-4 bg-gray-50">
-                            <h4 className="font-medium mb-2">Produce Details</h4>
-                            <p><strong>ID:</strong> {produceData.id?.toString()}</p>
-                            <p><strong>Crop Type:</strong> {produceData.cropType}</p>
-                            <p><strong>Harvest Date:</strong> {produceData.harvestDate}</p>
-                            <p><strong>Farmer ID:</strong> {produceData.farmerId?.toString()}</p>
-                            <p>
-                                <strong>Certification:</strong>{" "}
-                                <span className={`px-2 py-1 rounded text-xs ${
-                                    produceData.certified 
-                                        ? "bg-green-100 text-green-800" 
-                                        : "bg-yellow-100 text-yellow-800"
-                                }`}>
-                                    {produceData.certified ? "Certified" : "Uncertified"}
-                                </span>
-                            </p>
-                            
-                            <div className="mt-4 space-x-2">
-                                <button
-                                    onClick={() => certifyProduce(true)}
-                                    disabled={loading || produceData.certified}
-                                    className="btn"
-                                >
-                                    Certify Produce
-                                </button>
-                                <button
-                                    onClick={() => certifyProduce(false)}
-                                    disabled={loading || !produceData.certified}
-                                    className="btn bg-red-600 hover:bg-red-700"
-                                >
-                                    Uncertify Produce
-                                </button>
-                            </div>
-                        </div>
-                    )}
+            {error && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {error}
                 </div>
-            </div>
+            )}
 
-            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded">
-                <h4 className="font-medium text-yellow-900 mb-2">⚠️ Admin Notice:</h4>
-                <ul className="text-sm text-yellow-800 space-y-1">
-                    <li>• Only contract owners can verify farmers and certify produce</li>
-                    <li>• Make sure to verify farmers before they can record produce</li>
-                    <li>• Certification indicates organic or quality standards compliance</li>
-                    <li>• All actions are recorded on the blockchain and are irreversible</li>
-                </ul>
+            {success && (
+                <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+                    {success}
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Verify Farmer Form */}
+                <div className="bg-white p-6 rounded shadow">
+                    <h3 className="text-lg font-semibold mb-4">Verify Farmer</h3>
+                    <form onSubmit={handleVerifyFarmer} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Farmer ID *</label>
+                            <input
+                                type="number"
+                                value={farmerId}
+                                onChange={(e) => setFarmerId(e.target.value)}
+                                placeholder="Enter farmer ID"
+                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={isLoading}
+                                required
+                            />
+                        </div>
+
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="verifyStatus"
+                                checked={verifyStatus}
+                                onChange={(e) => setVerifyStatus(e.target.checked)}
+                                className="mr-2"
+                                disabled={isLoading}
+                            />
+                            <label htmlFor="verifyStatus" className="text-sm font-medium">
+                                Verify farmer
+                            </label>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Processing..." : "Verify Farmer"}
+                        </button>
+                    </form>
+                </div>
+
+                {/* Certify Produce Form */}
+                <div className="bg-white p-6 rounded shadow">
+                    <h3 className="text-lg font-semibold mb-4">Certify Produce</h3>
+                    <form onSubmit={handleCertifyProduce} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Produce ID *</label>
+                            <input
+                                type="number"
+                                value={produceId}
+                                onChange={(e) => setProduceId(e.target.value)}
+                                placeholder="Enter produce ID"
+                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={isLoading}
+                                required
+                            />
+                        </div>
+
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="certifyStatus"
+                                checked={certifyStatus}
+                                onChange={(e) => setCertifyStatus(e.target.checked)}
+                                className="mr-2"
+                                disabled={isLoading}
+                            />
+                            <label htmlFor="certifyStatus" className="text-sm font-medium">
+                                Certify produce
+                            </label>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Processing..." : "Certify Produce"}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );
