@@ -30,8 +30,8 @@ const { publicClient, webSocketPublicClient } = configureChains(
 
 // Initialize AppKit
 const appKit = createAppKit({
-    projectId: import.meta.env.VITE_REOWN_PROJECT_ID || "",
-    chains: [celo],
+    projectId: (import.meta.env.VITE_REOWN_PROJECT_ID as string) || "",
+    chains: [base]
 });
 
 // Create wagmi config with AppKit connectors
