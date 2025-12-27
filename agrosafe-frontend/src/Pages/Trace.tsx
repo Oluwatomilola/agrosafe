@@ -2,8 +2,16 @@ import React, { useState } from "react";
 import { useAgroSafeRead } from "../hooks/useAgroSafe";
 
 export default function Trace() {
+    type Produce = {
+        id: number;
+        cropType: string;
+        harvestDate: string;
+        farmerId: number;
+        certified: boolean;
+    };
+
     const [produceId, setProduceId] = useState("");
-    const [produce, setProduce] = useState<any>(null);
+    const [produce, setProduce] = useState<Produce | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const { getProduce, getFarmerById } = useAgroSafeRead();
