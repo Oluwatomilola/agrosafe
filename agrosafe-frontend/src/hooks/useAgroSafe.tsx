@@ -1,6 +1,5 @@
 import AgroSafeABI from "../abi/AgroSafe.json";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { parseAbi, parseContractResult } from "viem";
 import { Address } from "viem";
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_AGROSAFE_ADDRESS as string;
