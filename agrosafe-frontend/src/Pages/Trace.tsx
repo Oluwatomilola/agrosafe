@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAgroSafeRead } from "../hooks/useAgroSafe";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export default function Trace() {
     type Produce = {
@@ -33,7 +34,7 @@ export default function Trace() {
             setProduce(produceData);
         } catch (err) {
             console.error("Trace error:", err);
-            const errorMessage = (err as any)?.message || "Unknown error occurred";
+            const errorMessage = getErrorMessage(err);
             setError("Failed to trace produce: " + errorMessage);
         } finally {
             setIsLoading(false);
