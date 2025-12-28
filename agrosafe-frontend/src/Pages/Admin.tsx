@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useAgroSafeRead, useAgroSafeWrite } from "../hooks/useAgroSafe";
+import React, { useState } from "react";
+import { useAgroSafeWrite } from "../hooks/useAgroSafe";
 import { getErrorMessage } from "../utils/getErrorMessage";
 
 export default function Admin() {
