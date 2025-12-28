@@ -1,7 +1,22 @@
 import AgroSafeABI from "../abi/AgroSafe.json";
 import { usePublicClient, useWalletClient } from "wagmi";
+import { parseAbi } from "viem";
 import { Address } from "viem";
 
+const CONTRACT_ADDRESS = (import.meta.env.VITE_AGROSAFE_ADDRESS as string) || "";
+const PARSED_ABI = parseAbi(AgroSafeABI as any);
+
+export function useAgroSafeRead() {
+    const publicClient = usePublicClient();
+    if (!CONTRACT_ADDRESS) {
+        throw new Error("VITE_AGROSAFE_ADDRESS is not set. Please configure your Vite env.");
+    }
+    return {
+        async getFarmerById(id: number) {
+            if (!publicClient) throw new Error("publicClient is not available");
+            return publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
 // Type definitions for contract data
 export interface Farmer {
     id: bigint;
@@ -54,39 +69,22 @@ export function useAgroSafeRead() {
                 verified: result[4]
             };
         },
-        
-        async getProduce(id: number): Promise<Produce> {
-            if (!publicClient) {
-                throw new Error("Public client not available");
-            }
-            
-            const result = await publicClient.readContract({
-                address: getContractAddress(),
-                abi: typedAgroSafeABI,
-                functionName: "produce",
-                args: [BigInt(id)]
-            }) as [bigint, string, string, bigint, boolean];
-            
-            return {
-                id: result[0],
-                farmerId: result[3],
-                cropType: result[1],
-                harvestDate: result[2],
-                certified: result[4]
-            };
-        },
-        
-        async getTotalFarmers(): Promise<bigint> {
-            if (!publicClient) {
-                throw new Error("Public client not available");
-            }
-            
-            return await publicClient.readContract({
-                address: getContractAddress(),
-                abi: typedAgroSafeABI,
+        async totalFarmers() {
+            if (!publicClient) throw new Error("publicClient is not available");
+            return publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
                 functionName: "totalFarmers"
             }) as bigint;
         },
+        async getProduce(id: number) {
+            if (!publicClient) throw new Error("publicClient is not available");
+            return publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
+                functionName: "produce",
+                args: [id]
+            });
         
         async getTotalProduce(): Promise<bigint> {
             if (!publicClient) {
@@ -117,6 +115,15 @@ export function useAgroSafeRead() {
 
 export function useAgroSafeWrite() {
     const walletClient = useWalletClient();
+    if (!CONTRACT_ADDRESS) {
+        throw new Error("VITE_AGROSAFE_ADDRESS is not set. Please configure your Vite env.");
+    }
+    return {
+        async registerFarmer(name: string, location: string) {
+            if (!walletClient) throw new Error("walletClient is not available");
+            return walletClient.writeContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
     
     return {
         async registerFarmer(name: string, location: string): Promise<`0x${string}`> {
@@ -148,74 +155,29 @@ export function useAgroSafeWrite() {
                 args: [name.trim(), location.trim()]
             });
         },
-        
-        async recordProduce(cropType: string, harvestDate: string): Promise<`0x${string}`> {
-            if (!walletClient?.data) {
-                throw new Error("Wallet not connected");
-            }
-            
-            // Input validation
-            if (!cropType.trim()) {
-                throw new Error("Crop type is required");
-            }
-            
-            if (!harvestDate.trim()) {
-                throw new Error("Harvest date is required");
-            }
-            
-            if (cropType.length > 100) {
-                throw new Error("Crop type must be less than 100 characters");
-            }
-            
-            // Validate date format (basic validation)
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateRegex.test(harvestDate)) {
-                throw new Error("Harvest date must be in YYYY-MM-DD format");
-            }
-            
-            const harvestDateObj = new Date(harvestDate);
-            const currentDate = new Date();
-            if (harvestDateObj > currentDate) {
-                throw new Error("Harvest date cannot be in the future");
-            }
-            
-            return await walletClient.data.writeContract({
-                address: getContractAddress(),
-                abi: typedAgroSafeABI,
+        async recordProduce(cropType: string, harvestDate: string) {
+            if (!walletClient) throw new Error("walletClient is not available");
+            return walletClient.writeContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
                 functionName: "recordProduce",
                 args: [cropType.trim(), harvestDate.trim()]
             });
         },
-        
-        async verifyFarmer(farmerId: number, status: boolean): Promise<`0x${string}`> {
-            if (!walletClient?.data) {
-                throw new Error("Wallet not connected");
-            }
-            
-            if (farmerId <= 0) {
-                throw new Error("Invalid farmer ID");
-            }
-            
-            return await walletClient.data.writeContract({
-                address: getContractAddress(),
-                abi: typedAgroSafeABI,
+        async verifyFarmer(farmerId: number, status: boolean) {
+            if (!walletClient) throw new Error("walletClient is not available");
+            return walletClient.writeContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
                 functionName: "verifyFarmer",
                 args: [BigInt(farmerId), status]
             });
         },
-        
-        async certifyProduce(produceId: number, status: boolean): Promise<`0x${string}`> {
-            if (!walletClient?.data) {
-                throw new Error("Wallet not connected");
-            }
-            
-            if (produceId <= 0) {
-                throw new Error("Invalid produce ID");
-            }
-            
-            return await walletClient.data.writeContract({
-                address: getContractAddress(),
-                abi: typedAgroSafeABI,
+        async certifyProduce(produceId: number, status: boolean) {
+            if (!walletClient) throw new Error("walletClient is not available");
+            return walletClient.writeContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
                 functionName: "certifyProduce",
                 args: [BigInt(produceId), status]
             });
