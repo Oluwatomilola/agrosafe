@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAgroSafeRead, useAgroSafeWrite } from "../hooks/useAgroSafe";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export default function Admin() {
     const [farmerId, setFarmerId] = useState("");
@@ -30,7 +31,7 @@ export default function Admin() {
             setVerifyStatus(false);
         } catch (err) {
             console.error("Verify farmer error:", err);
-            const errorMessage = (err as any)?.message || "Unknown error occurred";
+            const errorMessage = getErrorMessage(err);
             setError("Failed to verify farmer: " + errorMessage);
         } finally {
             setIsLoading(false);
@@ -56,7 +57,7 @@ export default function Admin() {
             setCertifyStatus(false);
         } catch (err) {
             console.error("Certify produce error:", err);
-            const errorMessage = (err as any)?.message || "Unknown error occurred";
+            const errorMessage = getErrorMessage(err);
             setError("Failed to certify produce: " + errorMessage);
         } finally {
             setIsLoading(false);

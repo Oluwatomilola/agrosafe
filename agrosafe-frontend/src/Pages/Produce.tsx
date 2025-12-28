@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAgroSafeWrite } from "../hooks/useAgroSafe";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export default function Produce() {
     const [cropType, setCropType] = useState("");
@@ -49,7 +50,7 @@ export default function Produce() {
             setHarvestDate("");
         } catch (err) {
             console.error("Record produce error:", err);
-            const errorMessage = (err as any)?.message || "Unknown error occurred";
+            const errorMessage = getErrorMessage(err);
             setError("Failed to record produce: " + errorMessage);
         } finally {
             setIsLoading(false);

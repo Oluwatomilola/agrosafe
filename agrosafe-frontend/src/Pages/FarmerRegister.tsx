@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAgroSafeWrite } from "../hooks/useAgroSafe";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export default function FarmerRegister() {
     const [name, setName] = useState("");
@@ -44,7 +45,7 @@ export default function FarmerRegister() {
             setLocation("");
         } catch (err) {
             console.error("Registration error:", err);
-            const errorMessage = (err as any)?.message || "Unknown error occurred";
+            const errorMessage = getErrorMessage(err);
             setError("Registration failed: " + errorMessage);
         } finally {
             setIsLoading(false);
