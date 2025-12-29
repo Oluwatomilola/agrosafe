@@ -3,9 +3,9 @@ import { useAccount } from "wagmi";
 import { useAgroSafeRead } from "../hooks/useAgroSafe";
 
 export default function Dashboard() {
-    const { totalFarmers, totalProduce } = useAgroSafeRead();
+    // Note: the contract ABI does not expose `totalProduce` — keep a single reliable metric.
+    const { totalFarmers } = useAgroSafeRead();
     const [farmers, setFarmers] = useState<number | null>(null);
-    const [produce, setProduce] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -13,12 +13,9 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const [farmersCount, produceCount] = await Promise.all([
-                    totalFarmers(),
-                    totalProduce()
-                ]);
+                const farmersCount = await totalFarmers();
                 setFarmers(Number(farmersCount));
-                setProduce(Number(produceCount));
+                // totalProduce is not available in the contract ABI; leave produce as null/fallback.
             } catch (err) {
                 console.error("Error fetching dashboard data:", err);
                 setError("Failed to load dashboard data. Please try again.");
