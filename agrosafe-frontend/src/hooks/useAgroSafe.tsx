@@ -6,6 +6,52 @@ import { Address } from "viem";
 const CONTRACT_ADDRESS = (import.meta.env.VITE_AGROSAFE_ADDRESS as string) || "";
 const PARSED_ABI = parseAbi(AgroSafeABI as any);
 
+export type Farmer = {
+    id: number;
+    name: string;
+    wallet: string;
+    location: string;
+    verified: boolean;
+};
+
+export type Produce = {
+    id: number;
+    cropType: string;
+    harvestDate: string;
+    farmerId: number;
+    certified: boolean;
+};
+
+function normalizeFarmer(raw: any): Farmer {
+    const id = raw?.id ?? raw?.[0];
+    const name = raw?.name ?? raw?.[1] ?? "";
+    const wallet = raw?.wallet ?? raw?.[2] ?? "";
+    const location = raw?.location ?? raw?.[3] ?? "";
+    const verified = raw?.verified ?? raw?.[4] ?? false;
+    return {
+        id: Number(id ?? 0),
+        name: String(name),
+        wallet: String(wallet),
+        location: String(location),
+        verified: Boolean(verified)
+    };
+}
+
+function normalizeProduce(raw: any): Produce {
+    const id = raw?.id ?? raw?.[0];
+    const cropType = raw?.cropType ?? raw?.[1] ?? "";
+    const harvestDate = raw?.harvestDate ?? raw?.[2] ?? "";
+    const farmerId = raw?.farmerId ?? raw?.[3];
+    const certified = raw?.certified ?? raw?.[4] ?? false;
+    return {
+        id: Number(id ?? 0),
+        cropType: String(cropType),
+        harvestDate: String(harvestDate),
+        farmerId: Number(farmerId ?? 0),
+        certified: Boolean(certified)
+    };
+}
+
 export function useAgroSafeRead() {
     const publicClient = usePublicClient();
     if (!CONTRACT_ADDRESS) {
@@ -14,7 +60,7 @@ export function useAgroSafeRead() {
     return {
         async getFarmerById(id: number) {
             if (!publicClient) throw new Error("publicClient is not available");
-            return publicClient.readContract({
+            const raw = await publicClient.readContract({
                 address: CONTRACT_ADDRESS as Address,
                 abi: PARSED_ABI,
 // Type definitions for contract data
@@ -58,16 +104,9 @@ export function useAgroSafeRead() {
                 address: getContractAddress(),
                 abi: typedAgroSafeABI,
                 functionName: "farmers",
-                args: [BigInt(id)]
-            }) as [bigint, string, Address, string, boolean];
-            
-            return {
-                id: result[0],
-                name: result[1],
-                wallet: result[2],
-                location: result[3],
-                verified: result[4]
-            };
+                args: [id]
+            });
+            return normalizeFarmer(raw as any);
         },
         // Note: contract ABI does not expose a `totalFarmers` function.
         async totalFarmers() {
@@ -80,36 +119,13 @@ export function useAgroSafeRead() {
         },
         async getProduce(id: number) {
             if (!publicClient) throw new Error("publicClient is not available");
-            return publicClient.readContract({
+            const raw = await publicClient.readContract({
                 address: CONTRACT_ADDRESS as Address,
                 abi: PARSED_ABI,
                 functionName: "produce",
                 args: [id]
             });
-        
-        async getTotalProduce(): Promise<bigint> {
-            if (!publicClient) {
-                throw new Error("Public client not available");
-            }
-            
-            return await publicClient.readContract({
-                address: getContractAddress(),
-                abi: typedAgroSafeABI,
-                functionName: "totalProduce"
-            }) as bigint;
-        },
-        
-        async getFarmerIdByWallet(wallet: Address): Promise<bigint> {
-            if (!publicClient) {
-                throw new Error("Public client not available");
-            }
-            
-            return await publicClient.readContract({
-                address: getContractAddress(),
-                abi: typedAgroSafeABI,
-                functionName: "farmerIdsByWallet",
-                args: [wallet]
-            }) as bigint;
+            return normalizeProduce(raw as any);
         }
     };
 }
