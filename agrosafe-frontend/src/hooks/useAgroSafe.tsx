@@ -21,14 +21,7 @@ export function useAgroSafeRead() {
                 args: [id]
             });
         },
-        async totalFarmers() {
-            if (!publicClient) throw new Error("publicClient is not available");
-            return publicClient.readContract({
-                address: CONTRACT_ADDRESS as Address,
-                abi: PARSED_ABI,
-                functionName: "totalFarmers"
-            });
-        },
+        // Note: contract ABI does not expose a `totalFarmers` function.
         async getProduce(id: number) {
             if (!publicClient) throw new Error("publicClient is not available");
             return publicClient.readContract({
