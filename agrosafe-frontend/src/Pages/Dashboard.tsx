@@ -8,27 +8,11 @@ export default function Dashboard() {
     // Note: the contract ABI does not expose `totalProduce` — keep a single reliable metric.
     const { totalFarmers } = useAgroSafeRead();
     const [farmers, setFarmers] = useState<number | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(true);
-                const farmersCount = await totalFarmers();
-                setFarmers(Number(farmersCount));
-                // totalProduce is not available in the contract ABI; leave produce as null/fallback.
-            } catch (err) {
-                logger.error("Error fetching dashboard data:", err);
-                const msg = getErrorMessage(err);
-                setError("Failed to load dashboard data: " + msg);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
+    // Note: the current contract ABI doesn't include counters (e.g. totalFarmers/totalProduce).
+    // Server-side/indexed data or contract updates are required for aggregated metrics.
 
     return (
         <div className="max-w-5xl mx-auto">

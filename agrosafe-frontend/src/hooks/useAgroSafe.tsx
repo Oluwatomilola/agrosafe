@@ -69,6 +69,7 @@ export function useAgroSafeRead() {
                 verified: result[4]
             };
         },
+        // Note: contract ABI does not expose a `totalFarmers` function.
         async totalFarmers() {
             if (!publicClient) throw new Error("publicClient is not available");
             return publicClient.readContract({

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAgroSafeRead } from "../hooks/useAgroSafe";
 import { getErrorMessage } from "../utils/getErrorMessage";
+import { logger } from "../utils/logger";
 
 export default function Trace() {
     type Produce = {
@@ -15,7 +16,7 @@ export default function Trace() {
     const [produce, setProduce] = useState<Produce | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const { getProduce, getFarmerById } = useAgroSafeRead();
+    const { getProduce } = useAgroSafeRead();
 
     const handleTrace = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,10 +31,10 @@ export default function Trace() {
         try {
             setIsLoading(true);
             const produceData = await getProduce(Number(produceId));
-            console.log("Produce data:", produceData);
+            logger.info("Produce data:", produceData);
             setProduce(produceData);
         } catch (err) {
-            console.error("Trace error:", err);
+            logger.error("Trace error:", err);
             const errorMessage = getErrorMessage(err);
             setError("Failed to trace produce: " + errorMessage);
         } finally {
