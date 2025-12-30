@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAgroSafeRead } from "../hooks/useAgroSafe";
+import { getErrorMessage } from "../utils/getErrorMessage";
+import { logger } from "../utils/logger";
 
 export default function Dashboard() {
     // Note: the contract ABI does not expose `totalProduce` — keep a single reliable metric.
@@ -16,8 +18,9 @@ export default function Dashboard() {
                 setFarmers(Number(farmersCount));
                 // totalProduce is not available in the contract ABI; leave produce as null/fallback.
             } catch (err) {
-                console.error("Error fetching dashboard data:", err);
-                setError("Failed to load dashboard data. Please try again.");
+                logger.error("Error fetching dashboard data:", err);
+                const msg = getErrorMessage(err);
+                setError("Failed to load dashboard data: " + msg);
             } finally {
                 setIsLoading(false);
             }
@@ -50,8 +53,8 @@ export default function Dashboard() {
 
                     <div className="bg-white p-6 rounded shadow border-l-4 border-green-500">
                         <h3 className="text-gray-600 text-sm font-medium uppercase tracking-wide">Total Produce Records</h3>
-                        <div className="text-4xl font-bold text-green-600 mt-2">{produce ?? "—"}</div>
-                        <p className="text-gray-500 text-sm mt-2">Recorded produce items</p>
+                        <div className="text-4xl font-bold text-green-600 mt-2">—</div>
+                        <p className="text-gray-500 text-sm mt-2">Recorded produce items (not available)</p>
                     </div>
                 </div>
             )}
