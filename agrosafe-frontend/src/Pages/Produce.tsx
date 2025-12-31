@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAgroSafeWrite } from "../hooks/useAgroSafe";
 import { getErrorMessage } from "../utils/getErrorMessage";
+import { logger } from "../utils/logger";
 
 export default function Produce() {
     const [cropType, setCropType] = useState("");
@@ -44,12 +45,12 @@ export default function Produce() {
         try {
             setIsLoading(true);
             const tx = await recordProduce(cropType.trim(), harvestDate);
-            console.log("Transaction hash:", tx);
+            logger.info("Transaction hash:", tx);
             setSuccess("Produce recorded successfully! Transaction: " + tx);
             setCropType("");
             setHarvestDate("");
         } catch (err) {
-            console.error("Record produce error:", err);
+            logger.error("Record produce error:", err);
             const errorMessage = getErrorMessage(err);
             setError("Failed to record produce: " + errorMessage);
         } finally {

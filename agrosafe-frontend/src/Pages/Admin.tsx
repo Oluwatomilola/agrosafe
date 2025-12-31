@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAgroSafeWrite } from "../hooks/useAgroSafe";
 import { getErrorMessage } from "../utils/getErrorMessage";
+import { logger } from "../utils/logger";
 
 export default function Admin() {
     const [farmerId, setFarmerId] = useState("");
@@ -25,12 +26,11 @@ export default function Admin() {
         try {
             setIsLoading(true);
             const tx = await verifyFarmer(Number(farmerId), verifyStatus);
-            console.log("Transaction hash:", tx);
+            logger.info("Transaction hash:", tx);
             setSuccess(`Farmer ${verifyStatus ? "verified" : "unverified"} successfully! Transaction: ${tx}`);
             setFarmerId("");
             setVerifyStatus(false);
         } catch (err) {
-            console.error("Verify farmer error:", err);
             const errorMessage = getErrorMessage(err);
             setError("Failed to verify farmer: " + errorMessage);
         } finally {
@@ -51,12 +51,11 @@ export default function Admin() {
         try {
             setIsLoading(true);
             const tx = await certifyProduce(Number(produceId), certifyStatus);
-            console.log("Transaction hash:", tx);
+            logger.info("Transaction hash:", tx);
             setSuccess(`Produce ${certifyStatus ? "certified" : "uncertified"} successfully! Transaction: ${tx}`);
             setProduceId("");
             setCertifyStatus(false);
         } catch (err) {
-            console.error("Certify produce error:", err);
             const errorMessage = getErrorMessage(err);
             setError("Failed to certify produce: " + errorMessage);
         } finally {
