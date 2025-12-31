@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAgroSafeWrite } from "../hooks/useAgroSafe";
 import { getErrorMessage } from "../utils/getErrorMessage";
+import { logger } from "../utils/logger";
 
 export default function FarmerRegister() {
     const [name, setName] = useState("");
@@ -9,26 +10,6 @@ export default function FarmerRegister() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const { registerFarmer } = useAgroSafeWrite();
-
-    const validateForm = () => {
-        if (!name.trim()) {
-            setError("Name is required");
-            return false;
-        }
-        if (name.trim().length < 2) {
-            setError("Name must be at least 2 characters long");
-            return false;
-        }
-        if (!location.trim()) {
-            setError("Location is required");
-            return false;
-        }
-        if (location.trim().length < 2) {
-            setError("Location must be at least 2 characters long");
-            return false;
-        }
-        return true;
-    };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,12 +40,12 @@ export default function FarmerRegister() {
         try {
             setIsLoading(true);
             const tx = await registerFarmer(name.trim(), location.trim());
-            console.log("Transaction hash:", tx);
+            logger.info("Transaction hash:", tx);
             setSuccess("Registration successful! Transaction: " + tx);
             setName("");
             setLocation("");
         } catch (err) {
-            console.error("Registration error:", err);
+            logger.error("Registration error:", err);
             const errorMessage = getErrorMessage(err);
             setError("Registration failed: " + errorMessage);
         } finally {
@@ -125,16 +106,6 @@ export default function FarmerRegister() {
                     {isLoading ? "Registering..." : "Register"}
                 </button>
             </form>
-            
-            <div className="mt-6 bg-blue-50 border border-blue-200 p-4 rounded">
-                <h4 className="font-medium text-blue-900 mb-2">Important Notes:</h4>
-                <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Connect your wallet before registering</li>
-                    <li>• Only verified farmers can record produce</li>
-                    <li>• All information will be stored on the blockchain</li>
-                    <li>• You may need admin approval to become active</li>
-                </ul>
-            </div>
         </div>
     );
 }

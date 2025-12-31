@@ -1,53 +1,38 @@
 import React from "react";
-import {
-    configureChains,
-    createConfig,
-    WagmiConfig
-} from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
-import { base } from "viem/chains";
+import { WagmiProvider, http } from "wagmi";
+import { foundry, sepolia } from "viem/chains";
 import { createAppKit } from "@reown/appkit";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
-// Environment variable validation with fallback
-const REOWN_PROJECT_ID = import.meta.env.VITE_REOWN_PROJECT_ID || "demo_project_id";
-const CONTRACT_ADDRESS = import.meta.env.VITE_AGROSAFE_ADDRESS || "0x0000000000000000000000000000000000000000";
+const chains = [sepolia, foundry];
 
-if (!REOWN_PROJECT_ID || REOWN_PROJECT_ID === "demo_project_id") {
-    console.warn("Using demo Reown project ID. Please set VITE_REOWN_PROJECT_ID in your .env file for production use.");
-}
+const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || "";
 
-// Set the contract address globally for use in hooks
-(window as any).AGROSAFE_CONTRACT_ADDRESS = CONTRACT_ADDRESS;
+// Create Wagmi adapter
+const wagmiAdapter = new WagmiAdapter({
+    chains,
+    projectId,
+    transports: {
+        [foundry.id]: http(),
+        [sepolia.id]: http(),
+    }
+});
 
-const chains = [foundry]; // replace with chain you use, e.g., baseSepolia
-const { publicClient } = configureChains(chains, [publicProvider()]);
-// Configure chains
-const { publicClient, webSocketPublicClient } = configureChains(
-  [base],
-  [publicProvider()]
-);
+const wagmiConfig = wagmiAdapter.wagmiConfig;
 
-// Initialize AppKit
+// Create AppKit
 const appKit = createAppKit({
-    projectId: (import.meta.env.VITE_REOWN_PROJECT_ID as string) || "",
-    chains: [base]
+    adapters: [wagmiAdapter],
+    projectId,
+    networks: chains,
+    metadata: {
+        name: "AgroSafe",
+        description: "Decentralized farmer and produce verification",
+        url: "http://localhost:5173",
+        icons: ["https://avatars.githubusercontent.com/u/37784886"]
+    }
 });
 
-// Create wagmi config with AppKit connectors
-const config = createConfig({
-  autoConnect: true,
-  publicClient,
-  webSocketPublicClient,
-  connectors: appKitWagmi({ appKit }),
-});
-
-interface WagmiReownProviderProps {
-  children: React.ReactNode;
-}
-
-export const WagmiReownProvider: React.FC<WagmiReownProviderProps> = ({ 
-  children 
-}) => {
-  return <WagmiConfig config={config}>{children}</WagmiConfig>;
+export const WagmiReownProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    return <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>;
 };
