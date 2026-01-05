@@ -37,13 +37,14 @@ function normalizeFarmer(raw: any): Farmer {
 }
 
 function normalizeProduce(raw: any): Produce {
+    // ABI order: id, farmerId, cropType, harvestDate, certified
     // Note: ABI has wrong order for produce struct, should be id, farmerId, cropType, harvestDate, certified
     // But current ABI has id, cropType, harvestDate, farmerId, certified
     // So adjust normalization accordingly
     const id = raw?.id ?? raw?.[0];
-    const cropType = raw?.cropType ?? raw?.[1] ?? "";
-    const harvestDate = raw?.harvestDate ?? raw?.[2] ?? "";
-    const farmerId = raw?.farmerId ?? raw?.[3];
+    const farmerId = raw?.farmerId ?? raw?.[1];
+    const cropType = raw?.cropType ?? raw?.[2] ?? "";
+    const harvestDate = raw?.harvestDate ?? raw?.[3] ?? "";
     const certified = raw?.certified ?? raw?.[4] ?? false;
     return {
         id: Number(id ?? 0),
@@ -69,6 +70,14 @@ export function useAgroSafeRead() {
                 args: [id]
             });
             return normalizeFarmer(raw as any);
+        },
+        async totalFarmers() {
+            if (!publicClient) throw new Error("publicClient is not available");
+            return await publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
+                functionName: "totalFarmers"
+            }) as bigint;
         },
         async getProduce(id: number) {
             if (!publicClient) throw new Error("publicClient is not available");
