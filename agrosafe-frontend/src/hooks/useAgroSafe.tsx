@@ -37,10 +37,11 @@ function normalizeFarmer(raw: any): Farmer {
 }
 
 function normalizeProduce(raw: any): Produce {
+    // ABI order: id, farmerId, cropType, harvestDate, certified
     const id = raw?.id ?? raw?.[0];
-    const cropType = raw?.cropType ?? raw?.[1] ?? "";
-    const harvestDate = raw?.harvestDate ?? raw?.[2] ?? "";
-    const farmerId = raw?.farmerId ?? raw?.[3];
+    const farmerId = raw?.farmerId ?? raw?.[1];
+    const cropType = raw?.cropType ?? raw?.[2] ?? "";
+    const harvestDate = raw?.harvestDate ?? raw?.[3] ?? "";
     const certified = raw?.certified ?? raw?.[4] ?? false;
     return {
         id: Number(id ?? 0),
@@ -67,7 +68,14 @@ export function useAgroSafeRead() {
             });
             return normalizeFarmer(raw as any);
         },
-        // Note: contract ABI does not expose a `totalFarmers` function.
+        async totalFarmers() {
+            if (!publicClient) throw new Error("publicClient is not available");
+            return await publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
+                functionName: "totalFarmers"
+            }) as bigint;
+        },
         async getProduce(id: number) {
             if (!publicClient) throw new Error("publicClient is not available");
             const raw = await publicClient.readContract({
