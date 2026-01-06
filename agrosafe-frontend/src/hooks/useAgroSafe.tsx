@@ -38,9 +38,9 @@ function normalizeFarmer(raw: any): Farmer {
 
 function normalizeProduce(raw: any): Produce {
     const id = raw?.id ?? raw?.[0];
-    const cropType = raw?.cropType ?? raw?.[1] ?? "";
-    const harvestDate = raw?.harvestDate ?? raw?.[2] ?? "";
-    const farmerId = raw?.farmerId ?? raw?.[3];
+    const farmerId = raw?.farmerId ?? raw?.[1];
+    const cropType = raw?.cropType ?? raw?.[2] ?? "";
+    const harvestDate = raw?.harvestDate ?? raw?.[3] ?? "";
     const certified = raw?.certified ?? raw?.[4] ?? false;
     return {
         id: Number(id ?? 0),
