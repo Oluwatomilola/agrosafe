@@ -144,13 +144,13 @@ export function useAgroSafeWrite() {
                 args: [BigInt(farmerId), status]
             } as any);
         },
-        async certifyProduce(produceId: number, status: boolean) {
+        async certifyProduce(produceId: number, certified: boolean) {
             if (!walletClient) throw new Error("walletClient is not available");
             return walletClient.writeContract({
                 address: CONTRACT_ADDRESS as Address,
                 abi: PARSED_ABI,
                 functionName: "certifyProduce",
-                args: [BigInt(produceId), status]
+                args: [produceId, certified]
             } as any);
         }
     };
