@@ -37,6 +37,10 @@ function normalizeFarmer(raw: any): Farmer {
 }
 
 function normalizeProduce(raw: any): Produce {
+    // ABI order: id, farmerId, cropType, harvestDate, certified
+    // Note: ABI has wrong order for produce struct, should be id, farmerId, cropType, harvestDate, certified
+    // But current ABI has id, cropType, harvestDate, farmerId, certified
+    // So adjust normalization accordingly
     const id = raw?.id ?? raw?.[0];
     const farmerId = raw?.farmerId ?? raw?.[1];
     const cropType = raw?.cropType ?? raw?.[2] ?? "";
@@ -67,7 +71,14 @@ export function useAgroSafeRead() {
             });
             return normalizeFarmer(raw as any);
         },
-        // Note: contract ABI does not expose a `totalFarmers` function.
+        async totalFarmers() {
+            if (!publicClient) throw new Error("publicClient is not available");
+            return await publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
+                functionName: "totalFarmers"
+            }) as bigint;
+        },
         async getProduce(id: number) {
             if (!publicClient) throw new Error("publicClient is not available");
             const raw = await publicClient.readContract({
@@ -89,20 +100,39 @@ export function useAgroSafeWrite() {
     return {
         async registerFarmer(name: string, location: string) {
             if (!walletClient) throw new Error("walletClient is not available");
+            // Input validation
+            if (!name.trim()) {
+                throw new Error("Name is required");
+            }
+            if (!location.trim()) {
+                throw new Error("Location is required");
+            }
+            if (name.length > 100) {
+                throw new Error("Name must be less than 100 characters");
+            }
+            if (location.length > 200) {
+                throw new Error("Location must be less than 200 characters");
+            }
             return walletClient.writeContract({
                 address: CONTRACT_ADDRESS as Address,
                 abi: PARSED_ABI,
                 functionName: "registerFarmer",
-                args: [name, location]
+                args: [name.trim(), location.trim()]
             } as any);
         },
         async recordProduce(cropType: string, harvestDate: string) {
             if (!walletClient) throw new Error("walletClient is not available");
+            if (!cropType.trim()) {
+                throw new Error("Crop type is required");
+            }
+            if (!harvestDate.trim()) {
+                throw new Error("Harvest date is required");
+            }
             return walletClient.writeContract({
                 address: CONTRACT_ADDRESS as Address,
                 abi: PARSED_ABI,
                 functionName: "recordProduce",
-                args: [cropType, harvestDate]
+                args: [cropType.trim(), harvestDate.trim()]
             } as any);
         },
         async verifyFarmer(farmerId: number, status: boolean) {
@@ -111,7 +141,7 @@ export function useAgroSafeWrite() {
                 address: CONTRACT_ADDRESS as Address,
                 abi: PARSED_ABI,
                 functionName: "verifyFarmer",
-                args: [farmerId, status]
+                args: [BigInt(farmerId), status]
             } as any);
         },
         async certifyProduce(produceId: number, certified: boolean) {
