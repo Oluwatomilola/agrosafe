@@ -94,6 +94,15 @@ export function useAgroSafeRead() {
                 functionName: "totalProduce",
                 args: []
             }) as bigint;
+        },
+        async getFarmerIdByWallet(wallet: string) {
+            if (!publicClient) throw new Error("publicClient is not available");
+            return await publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
+                functionName: "farmerIdsByWallet",
+                args: [wallet as Address]
+            }) as bigint;
         }
     };
 }
