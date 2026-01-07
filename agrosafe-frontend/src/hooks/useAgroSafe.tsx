@@ -88,6 +88,24 @@ export function useAgroSafeRead() {
                 args: [id]
             });
             return normalizeProduce(raw as any);
+        },
+        async getTotalFarmers() {
+            if (!publicClient) throw new Error("publicClient is not available");
+            return await publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
+                functionName: "totalFarmers",
+                args: []
+            }) as bigint;
+        },
+        async getTotalProduce() {
+            if (!publicClient) throw new Error("publicClient is not available");
+            return await publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: PARSED_ABI,
+                functionName: "totalProduce",
+                args: []
+            }) as bigint;
         }
     };
 }
