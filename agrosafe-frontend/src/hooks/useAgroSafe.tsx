@@ -22,13 +22,17 @@ export type Produce = {
 };
 
 function normalizeFarmer(raw: any): Farmer {
+    if (!raw) throw new Error("Farmer data is null or undefined");
     const id = raw?.id ?? raw?.[0];
-    const name = raw?.name ?? raw?.[1] ?? "";
-    const wallet = raw?.wallet ?? raw?.[2] ?? "";
-    const location = raw?.location ?? raw?.[3] ?? "";
-    const verified = raw?.verified ?? raw?.[4] ?? false;
+    const name = raw?.name ?? raw?.[1];
+    const wallet = raw?.wallet ?? raw?.[2];
+    const location = raw?.location ?? raw?.[3];
+    const verified = raw?.verified ?? raw?.[4];
+    if (id == null || name == null || wallet == null || location == null || verified == null) {
+        throw new Error("Incomplete farmer data received from contract");
+    }
     return {
-        id: Number(id ?? 0),
+        id: Number(id),
         name: String(name),
         wallet: String(wallet),
         location: String(location),
@@ -37,16 +41,20 @@ function normalizeFarmer(raw: any): Farmer {
 }
 
 function normalizeProduce(raw: any): Produce {
+    if (!raw) throw new Error("Produce data is null or undefined");
     const id = raw?.id ?? raw?.[0];
     const farmerId = raw?.farmerId ?? raw?.[1];
-    const cropType = raw?.cropType ?? raw?.[2] ?? "";
-    const harvestDate = raw?.harvestDate ?? raw?.[3] ?? "";
-    const certified = raw?.certified ?? raw?.[4] ?? false;
+    const cropType = raw?.cropType ?? raw?.[2];
+    const harvestDate = raw?.harvestDate ?? raw?.[3];
+    const certified = raw?.certified ?? raw?.[4];
+    if (id == null || farmerId == null || cropType == null || harvestDate == null || certified == null) {
+        throw new Error("Incomplete produce data received from contract");
+    }
     return {
-        id: Number(id ?? 0),
+        id: Number(id),
         cropType: String(cropType),
         harvestDate: String(harvestDate),
-        farmerId: Number(farmerId ?? 0),
+        farmerId: Number(farmerId),
         certified: Boolean(certified)
     };
 }
