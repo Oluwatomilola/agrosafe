@@ -128,7 +128,7 @@ export function useAgroSafeWrite() {
                 abi: PARSED_ABI,
                 functionName: "registerFarmer",
                 args: [name, location]
-            } as any);
+            });
         },
         async recordProduce(cropType: string, harvestDate: string) {
             if (!walletClient) throw new Error("walletClient is not available");
@@ -137,7 +137,7 @@ export function useAgroSafeWrite() {
                 abi: PARSED_ABI,
                 functionName: "recordProduce",
                 args: [cropType, harvestDate]
-            } as any);
+            });
         },
         async verifyFarmer(farmerId: number, status: boolean) {
             if (!walletClient) throw new Error("walletClient is not available");
@@ -145,8 +145,8 @@ export function useAgroSafeWrite() {
                 address: CONTRACT_ADDRESS as Address,
                 abi: PARSED_ABI,
                 functionName: "verifyFarmer",
-                args: [farmerId, status]
-            } as any);
+                args: [BigInt(farmerId), status]
+            });
         },
         async certifyProduce(produceId: number, certified: boolean) {
             if (!walletClient) throw new Error("walletClient is not available");
@@ -154,8 +154,8 @@ export function useAgroSafeWrite() {
                 address: CONTRACT_ADDRESS as Address,
                 abi: PARSED_ABI,
                 functionName: "certifyProduce",
-                args: [produceId, certified]
-            } as any);
+                args: [BigInt(produceId), certified]
+            });
         }
     };
 }
