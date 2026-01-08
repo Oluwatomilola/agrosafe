@@ -4,14 +4,30 @@ import { getErrorMessage } from "../utils/getErrorMessage";
 import { logger } from "../utils/logger";
 
 export default function Dashboard() {
-    // Note: the contract ABI does not expose `totalProduce` — keep a single reliable metric.
-    const { totalFarmers } = useAgroSafeRead();
-    const [farmers, setFarmers] = useState<number | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const { totalFarmers, getTotalProduce } = useAgroSafeRead();
+    const [farmersCount, setFarmersCount] = useState<number | null>(null);
+    const [produceCount, setProduceCount] = useState<number | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Note: the current contract ABI doesn't include counters (e.g. totalFarmers/totalProduce).
-    // Server-side/indexed data or contract updates are required for aggregated metrics.
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const farmers = await totalFarmers();
+                setFarmersCount(Number(farmers));
+                const produce = await getTotalProduce();
+                setProduceCount(Number(produce));
+            } catch (err) {
+                logger.error("Failed to fetch dashboard data:", err);
+                const errorMessage = getErrorMessage(err);
+                setError("Failed to load dashboard data: " + errorMessage);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [totalFarmers, getTotalProduce]);
 
     return (
         <div className="max-w-5xl mx-auto">
@@ -31,14 +47,14 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div className="bg-white p-6 rounded shadow border-l-4 border-blue-500">
                         <h3 className="text-gray-600 text-sm font-medium uppercase tracking-wide">Total Farmers</h3>
-                        <div className="text-4xl font-bold text-blue-600 mt-2">{farmers ?? "—"}</div>
+                        <div className="text-4xl font-bold text-blue-600 mt-2">{farmersCount ?? "—"}</div>
                         <p className="text-gray-500 text-sm mt-2">Registered farmers in the system</p>
                     </div>
 
                     <div className="bg-white p-6 rounded shadow border-l-4 border-green-500">
                         <h3 className="text-gray-600 text-sm font-medium uppercase tracking-wide">Total Produce Records</h3>
-                        <div className="text-4xl font-bold text-green-600 mt-2">—</div>
-                        <p className="text-gray-500 text-sm mt-2">Recorded produce items (not available)</p>
+                        <div className="text-4xl font-bold text-green-600 mt-2">{produceCount ?? "—"}</div>
+                        <p className="text-gray-500 text-sm mt-2">Recorded produce items in the system</p>
                     </div>
                 </div>
             )}
