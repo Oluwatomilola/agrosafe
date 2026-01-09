@@ -1,9 +1,9 @@
 import AgroSafeABI from "../abi/AgroSafe.json";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { parseAbi, Address } from "viem";
+import { parseAbi, Address, Abi } from "viem";
 
 const CONTRACT_ADDRESS = (import.meta.env.VITE_AGROSAFE_ADDRESS as string) || "";
-const PARSED_ABI = parseAbi(AgroSafeABI as any);
+const PARSED_ABI = parseAbi(AgroSafeABI as unknown as Abi);
 
 export type Farmer = {
     id: number;
