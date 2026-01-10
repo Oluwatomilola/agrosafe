@@ -130,4 +130,13 @@ contract AgroSafe is Ownable {
     function totalProduce() external view returns (uint256) {
         return _produceIds;
     }
+
+    /**
+     * @notice Get farmer details by wallet address
+     */
+    function getFarmerByWallet(address wallet) external view returns (Farmer memory) {
+        uint256 farmerId = farmerIdsByWallet[wallet];
+        require(farmerId != 0, "Farmer not found");
+        return farmers[farmerId];
+    }
 }
