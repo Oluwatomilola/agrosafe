@@ -4,7 +4,7 @@ import { getErrorMessage } from "../utils/getErrorMessage";
 import { logger } from "../utils/logger";
 
 export default function Dashboard() {
-    const { totalFarmers, getTotalProduce } = useAgroSafeRead();
+    const { getTotalFarmers, getTotalProduce } = useAgroSafeRead();
     const [farmersCount, setFarmersCount] = useState<number | null>(null);
     const [produceCount, setProduceCount] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -13,7 +13,7 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const farmers = await totalFarmers();
+                const farmers = await getTotalFarmers();
                 setFarmersCount(Number(farmers));
                 const produce = await getTotalProduce();
                 setProduceCount(Number(produce));
@@ -27,7 +27,7 @@ export default function Dashboard() {
         };
 
         fetchData();
-    }, [totalFarmers, getTotalProduce]);
+    }, [getTotalFarmers, getTotalProduce]);
 
     return (
         <div className="max-w-5xl mx-auto">
