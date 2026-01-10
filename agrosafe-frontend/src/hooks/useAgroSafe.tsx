@@ -30,6 +30,14 @@ export function useAgroSafeRead() {
                 functionName: "produce",
                 args: [id]
             });
+        },
+        async getFarmerByWallet(wallet: string) {
+            return publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: AgroSafeABI as any,
+                functionName: "getFarmerByWallet",
+                args: [wallet as Address]
+            });
         }
     };
 }
