@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title AgroSafe
@@ -34,19 +34,29 @@ contract AgroSafe is Ownable {
 
     event FarmerRegistered(uint256 indexed id, string name, address wallet);
     event FarmerVerified(uint256 indexed id, bool status);
-    event ProduceRecorded(uint256 indexed id, uint256 farmerId, string cropType);
+    event ProduceRecorded(
+        uint256 indexed id,
+        uint256 farmerId,
+        string cropType
+    );
     event ProduceCertified(uint256 indexed id, bool certified);
 
     /**
-     * @dev Passes msg.sender as the initial owner to the Ownable constructor.
+     * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor() Ownable(msg.sender) {}
+    constructor () Ownable(msg.sender) {}
 
     /**
      * @notice Register a new farmer
      */
-    function registerFarmer(string memory name, string memory location) external {
-        require(farmerIdsByWallet[msg.sender] == 0, "Farmer already registered");
+    function registerFarmer(
+        string memory name,
+        string memory location
+    ) external {
+        require(
+            farmerIdsByWallet[msg.sender] == 0,
+            "Farmer already registered"
+        );
 
         _farmerIds++;
         uint256 newId = _farmerIds;
@@ -76,7 +86,10 @@ contract AgroSafe is Ownable {
     /**
      * @notice Record a produce linked to a farmer
      */
-    function recordProduce(string memory cropType, string memory harvestDate) external {
+    function recordProduce(
+        string memory cropType,
+        string memory harvestDate
+    ) external {
         uint256 farmerId = farmerIdsByWallet[msg.sender];
         require(farmerId != 0, "Farmer not registered");
         require(farmers[farmerId].verified, "Farmer not verified");
@@ -98,7 +111,10 @@ contract AgroSafe is Ownable {
     /**
      * @notice Certify produce (only owner/admin)
      */
-    function certifyProduce(uint256 produceId, bool certified) external onlyOwner {
+    function certifyProduce(
+        uint256 produceId,
+        bool certified
+    ) external onlyOwner {
         require(produce[produceId].id != 0, "Produce not found");
         produce[produceId].certified = certified;
         emit ProduceCertified(produceId, certified);
