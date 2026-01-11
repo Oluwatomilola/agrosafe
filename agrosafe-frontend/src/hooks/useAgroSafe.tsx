@@ -83,6 +83,10 @@ export function useAgroSafeRead() {
             if (!publicClient) throw new Error("publicClient is not available");
             return await publicClient.readContract({
                 address: CONTRACT_ADDRESS as Address,
+                abi: AgroSafeABI as any,
+                functionName: "totalFarmers",
+                args: []
+            });
                 abi: PARSED_ABI,
                 functionName: "totalFarmers"
             }) as bigint;
