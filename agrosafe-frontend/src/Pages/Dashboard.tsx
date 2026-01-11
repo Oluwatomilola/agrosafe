@@ -4,6 +4,9 @@ import { getErrorMessage } from "../utils/getErrorMessage";
 import { logger } from "../utils/logger";
 
 export default function Dashboard() {
+    const read = useAgroSafeRead();
+    const [totalFarmers, setTotalFarmers] = useState<number | null>(null);
+    const [totalProduce, setTotalProduce] = useState<number | null>(null);
     const { getTotalFarmers, getTotalProduce } = useAgroSafeRead();
     const [farmersCount, setFarmersCount] = useState<number | null>(null);
     const [produceCount, setProduceCount] = useState<number | null>(null);
@@ -13,6 +16,12 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const f = await read.totalFarmers();
+                setTotalFarmers(Number(f));
+                const p = await read.totalProduce();
+                setTotalProduce(Number(p));
+            } catch (e) {
+                console.error(e);
                 const farmers = await getTotalFarmers();
                 setFarmersCount(Number(farmers));
                 const produce = await getTotalProduce();
@@ -30,6 +39,16 @@ export default function Dashboard() {
     }, [getTotalFarmers, getTotalProduce]);
 
     return (
+        <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold mb-4">AgroSafe Dashboard</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-white rounded shadow">
+                    <h3 className="text-sm">Total Farmers</h3>
+                    <div className="text-xl">{totalFarmers ?? "—"}</div>
+                </div>
+                <div className="p-4 bg-white rounded shadow">
+                    <h3 className="text-sm">Total Produce</h3>
+                    <div className="text-xl">{totalProduce ?? "—"}</div>
         <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl font-bold mb-6">AgroSafe Dashboard</h2>
 
