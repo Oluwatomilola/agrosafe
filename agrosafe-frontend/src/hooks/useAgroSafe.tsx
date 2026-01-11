@@ -20,7 +20,8 @@ export function useAgroSafeRead() {
             return publicClient.readContract({
                 address: CONTRACT_ADDRESS as Address,
                 abi: AgroSafeABI as any,
-                functionName: "totalFarmers"
+                functionName: "totalFarmers",
+                args: []
             });
         },
         async getProduce(id: number) {
