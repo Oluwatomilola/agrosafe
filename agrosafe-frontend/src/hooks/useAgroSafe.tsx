@@ -95,6 +95,14 @@ export function useAgroSafeRead() {
                 functionName: "totalProduce",
                 args: []
             });
+        },
+        async totalProduce() {
+            return publicClient.readContract({
+                address: CONTRACT_ADDRESS as Address,
+                abi: AgroSafeABI as any,
+                functionName: "totalProduce",
+                args: []
+            });
                 abi: PARSED_ABI,
                 functionName: "totalFarmers"
             }) as bigint;

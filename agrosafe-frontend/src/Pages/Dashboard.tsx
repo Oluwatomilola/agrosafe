@@ -7,6 +7,11 @@ export default function Dashboard() {
     const read = useAgroSafeRead();
     const [totalFarmers, setTotalFarmers] = useState<number | null>(null);
     const [totalProduce, setTotalProduce] = useState<number | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        (async () => {
+            setLoading(true);
     const { getTotalFarmers, getTotalProduce } = useAgroSafeRead();
     const [farmersCount, setFarmersCount] = useState<number | null>(null);
     const [produceCount, setProduceCount] = useState<number | null>(null);
@@ -22,6 +27,8 @@ export default function Dashboard() {
                 setTotalProduce(Number(p));
             } catch (e) {
                 console.error(e);
+            } finally {
+                setLoading(false);
                 const farmers = await getTotalFarmers();
                 setFarmersCount(Number(farmers));
                 const produce = await getTotalProduce();
@@ -41,6 +48,7 @@ export default function Dashboard() {
     return (
         <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">AgroSafe Dashboard</h2>
+            {loading && <p>Loading...</p>}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 bg-white rounded shadow">
                     <h3 className="text-sm">Total Farmers</h3>
