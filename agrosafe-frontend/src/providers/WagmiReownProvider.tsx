@@ -1,29 +1,56 @@
 import React from "react";
-import {
-    configureChains,
-    createConfig,
-    WagmiConfig
-} from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
-import { foundry } from "viem/chains"; // example chain; replace if using Base Sepolia
+import { createConfig, WagmiProvider } from "wagmi";
+import { http } from "wagmi";
+import { foundry } from "viem/chains";
+import { WagmiProvider, http } from "wagmi";
+import { foundry, sepolia } from "viem/chains";
 import { createAppKit } from "@reown/appkit";
-import { appKitWagmi } from "@reown/appkit/wagmi";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
-const chains = [foundry]; // replace with chain you use, e.g., baseSepolia (if viem has it)
-const { publicClient } = configureChains(chains, [publicProvider()]);
+const chains = [foundry];
 
 // configure AppKit
 const appKit = createAppKit({
-    projectId: process.env.REACT_APP_REOWN_PROJECT_ID || "",
+    projectId: import.meta.env.VITE_REOWN_PROJECT_ID || "",
     chains
 });
 
 // wagmi config via appKit helper
 const wagmiConfig = createConfig({
-    publicClient,
+    chains,
+    transports: {
+        [foundry.id]: http(),
+    },
     connectors: appKitWagmi({ appKit })
+const chains = [sepolia, foundry];
+
+const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || "";
+
+// Create Wagmi adapter
+const wagmiAdapter = new WagmiAdapter({
+    chains,
+    projectId,
+    transports: {
+        [foundry.id]: http(),
+        [sepolia.id]: http(),
+    }
+});
+
+const wagmiConfig = wagmiAdapter.wagmiConfig;
+
+// Create AppKit
+const appKit = createAppKit({
+    adapters: [wagmiAdapter],
+    projectId,
+    networks: chains,
+    metadata: {
+        name: "AgroSafe",
+        description: "Decentralized farmer and produce verification",
+        url: "http://localhost:5173",
+        icons: ["https://avatars.githubusercontent.com/u/37784886"]
+    }
 });
 
 export const WagmiReownProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>;
+    return <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>;
 };
