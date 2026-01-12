@@ -55,14 +55,26 @@ button:focus-visible {
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+   :root {
+     color: #213547;
+     background-color: #ffffff;
+   }
+   a:hover {
+     color: #747bff;
+   }
+   button {
+     background-color: #f9f9f9;
+   }
+ }
+
+.input {
+  @apply border border-gray-300 rounded px-3 py-2 w-full;
+}
+
+.btn {
+  @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600;
+}
+
+.link {
+  @apply text-blue-500 hover:text-blue-700 underline;
 }
