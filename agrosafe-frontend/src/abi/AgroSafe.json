@@ -115,9 +115,9 @@
     "name": "produce",
     "outputs": [
       { "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "internalType": "uint256", "name": "farmerId", "type": "uint256" },
       { "internalType": "string", "name": "cropType", "type": "string" },
       { "internalType": "string", "name": "harvestDate", "type": "string" },
-      { "internalType": "uint256", "name": "farmerId", "type": "uint256" },
       { "internalType": "bool", "name": "certified", "type": "bool" }
     ],
     "stateMutability": "view",
