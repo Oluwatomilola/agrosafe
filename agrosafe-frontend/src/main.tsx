@@ -4,7 +4,10 @@ import App from "./App";
 import "./index.css";
 import { WagmiReownProvider } from "./providers/WagmiReownProvider";
 
-createRoot(document.getElementById("root")!).render(
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Root element not found");
+
+createRoot(rootElement).render(
     <React.StrictMode>
         <WagmiReownProvider>
             <App />
