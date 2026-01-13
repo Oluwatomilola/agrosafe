@@ -2,7 +2,7 @@ import React from "react";
 import {
     configureChains,
     createConfig,
-    WagmiConfig
+    WagmiProvider
 } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { foundry } from "viem/chains"; // example chain; replace if using Base Sepolia
@@ -25,5 +25,5 @@ const wagmiConfig = createConfig({
 });
 
 export const WagmiReownProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>;
+    return <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>;
 };
