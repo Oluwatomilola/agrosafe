@@ -63,6 +63,9 @@ npm run build
 - `VITE_AGROSAFE_ADDRESS`: The deployed AgroSafe contract address
 - `VITE_REOWN_PROJECT_ID`: Your Reown/WalletConnect project ID from https://cloud.reown.com/
 
+VITE_AGROSAFE_ADDRESS = 0x5FbDB2315678afccb333f8a9c37f3C54f8b0e6db
+
+
 ## Key Fixes Applied
 
 1. **Solidity Contract**: Fixed Ownable constructor call for OpenZeppelin v5 compatibility
