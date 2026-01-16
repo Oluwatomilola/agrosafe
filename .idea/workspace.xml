@@ -5,11 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b3e641d1-e771-4414-a07b-be3f5cfc60cb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/agrosafe.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/prettier.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agrosafe" beforeDir="false" afterPath="$PROJECT_DIR$/agrosafe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/agrosafe/agrosafe-contracts/.github/workflows/test.yml" beforeDir="false" afterPath="$PROJECT_DIR$/agrosafe/agrosafe-contracts/.github/workflows/test.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/agrosafe/agrosafe-contracts/foundry.toml" beforeDir="false" afterPath="$PROJECT_DIR$/agrosafe/agrosafe-contracts/foundry.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/agrosafe/agrosafe-contracts/lib/forge-std" beforeDir="false" afterPath="$PROJECT_DIR$/agrosafe/agrosafe-contracts/lib/forge-std" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agrosafe/agrosafe-frontend/src/providers/WagmiReownProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/agrosafe/agrosafe-frontend/src/providers/WagmiReownProvider.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,7 +17,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/agrosafe" />
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
   "customColor": "",
@@ -33,7 +33,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "1727a29b",
+    "git-widget-placeholder": "issue-87",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -67,7 +67,7 @@
       <option name="presentableId" value="Default" />
       <updated>1768409105663</updated>
       <workItem from="1768409109485" duration="206000" />
-      <workItem from="1768409355558" duration="612000" />
+      <workItem from="1768409355558" duration="1504000" />
     </task>
     <servers />
   </component>
