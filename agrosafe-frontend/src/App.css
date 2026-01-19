@@ -35,6 +35,29 @@
 
 .card {
   padding: 2em;
+  margin: 1em 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+input {
+  display: block;
+  margin: 0.5em auto;
+  padding: 0.5em;
+  width: 200px;
+}
+
+button {
+  background-color: #646cff;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #535bf2;
 }
 
 .read-the-docs {
