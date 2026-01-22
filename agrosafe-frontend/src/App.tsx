@@ -2,7 +2,6 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
 
@@ -32,14 +31,6 @@ function App() {
           onChange={(e) => setLocation(e.target.value)}
         />
         <button onClick={handleRegister}>Register Farmer</button>
-      </div>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Welcome to AgroSafe - Secure farming with blockchain
-        </p>
       </div>
     </>
   )
