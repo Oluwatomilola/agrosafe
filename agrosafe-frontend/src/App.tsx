@@ -24,7 +24,7 @@ const contractABI = [
   "function produce(uint256) external view returns (uint256, uint256, string, string, bool)"
 ]
 
-const contractAddress = "0xYourContractAddressHere" // Replace with actual deployed address
+const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS || "0xYourContractAddressHere" // Replace with actual deployed address or set REACT_APP_CONTRACT_ADDRESS
 
 function App() {
   const [name, setName] = useState('')
