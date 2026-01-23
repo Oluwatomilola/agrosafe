@@ -30,6 +30,12 @@ function App() {
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
   const [contract, setContract] = useState<ethers.Contract | null>(null)
+  const [farmerId, setFarmerId] = useState('')
+  const [verifyStatus, setVerifyStatus] = useState('')
+  const [cropType, setCropType] = useState('')
+  const [harvestDate, setHarvestDate] = useState('')
+  const [produceId, setProduceId] = useState('')
+  const [certifyStatus, setCertifyStatus] = useState('')
 
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -74,6 +80,71 @@ function App() {
     }
   }
 
+  const handleVerify = async () => {
+    if (!farmerId || !verifyStatus) {
+      alert("Please fill in all fields!")
+      return
+    }
+    if (!contract) {
+      alert("Please connect your wallet first!")
+      return
+    }
+    try {
+      const tx = await contract.verifyFarmer(farmerId, verifyStatus === 'true')
+      await tx.wait()
+      alert(`Farmer verified successfully!`)
+      setFarmerId('')
+      setVerifyStatus('')
+    } catch (error) {
+      console.error(error)
+      alert("Verification failed!")
+    }
+  }
+
+  const handleRecordProduce = async () => {
+    const trimmedCrop = cropType.trim()
+    const trimmedDate = harvestDate.trim()
+    if (!trimmedCrop || !trimmedDate) {
+      alert("Please fill in all fields!")
+      return
+    }
+    if (!contract) {
+      alert("Please connect your wallet first!")
+      return
+    }
+    try {
+      const tx = await contract.recordProduce(trimmedCrop, trimmedDate)
+      await tx.wait()
+      alert(`Produce recorded successfully!`)
+      setCropType('')
+      setHarvestDate('')
+    } catch (error) {
+      console.error(error)
+      alert("Recording failed!")
+    }
+  }
+
+  const handleCertify = async () => {
+    if (!produceId || !certifyStatus) {
+      alert("Please fill in all fields!")
+      return
+    }
+    if (!contract) {
+      alert("Please connect your wallet first!")
+      return
+    }
+    try {
+      const tx = await contract.certifyProduce(produceId, certifyStatus === 'true')
+      await tx.wait()
+      alert(`Produce certified successfully!`)
+      setProduceId('')
+      setCertifyStatus('')
+    } catch (error) {
+      console.error(error)
+      alert("Certification failed!")
+    }
+  }
+
   return (
     <>
       <div>
@@ -96,6 +167,52 @@ function App() {
           onChange={(e) => setLocation(e.target.value)}
         />
         <button onClick={handleRegister}>Register Farmer</button>
+      </div>
+      <div className="card">
+        <h2>Verify Farmer (Admin Only)</h2>
+        <input
+          type="number"
+          placeholder="Farmer ID"
+          value={farmerId}
+          onChange={(e) => setFarmerId(e.target.value)}
+        />
+        <select value={verifyStatus} onChange={(e) => setVerifyStatus(e.target.value)}>
+          <option value="">Select Status</option>
+          <option value="true">Verified</option>
+          <option value="false">Unverified</option>
+        </select>
+        <button onClick={handleVerify}>Verify Farmer</button>
+      </div>
+      <div className="card">
+        <h2>Record Produce</h2>
+        <input
+          type="text"
+          placeholder="Crop Type"
+          value={cropType}
+          onChange={(e) => setCropType(e.target.value)}
+        />
+        <input
+          type="date"
+          placeholder="Harvest Date"
+          value={harvestDate}
+          onChange={(e) => setHarvestDate(e.target.value)}
+        />
+        <button onClick={handleRecordProduce}>Record Produce</button>
+      </div>
+      <div className="card">
+        <h2>Certify Produce (Admin Only)</h2>
+        <input
+          type="number"
+          placeholder="Produce ID"
+          value={produceId}
+          onChange={(e) => setProduceId(e.target.value)}
+        />
+        <select value={certifyStatus} onChange={(e) => setCertifyStatus(e.target.value)}>
+          <option value="">Select Status</option>
+          <option value="true">Certified</option>
+          <option value="false">Uncertified</option>
+        </select>
+        <button onClick={handleCertify}>Certify Produce</button>
       </div>
     </>
   )
