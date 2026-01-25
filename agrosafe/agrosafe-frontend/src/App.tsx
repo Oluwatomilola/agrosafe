@@ -24,7 +24,7 @@ const contractABI = [
   "function produce(uint256) external view returns (uint256, uint256, string, string, bool)"
 ]
 
-const contractAddress = "0xYourContractAddressHere" // Replace with actual deployed address
+const contractAddress = "0x0000000000000000000000000000000000000000" // Replace with actual deployed address
 
 function App() {
   const [name, setName] = useState('')
