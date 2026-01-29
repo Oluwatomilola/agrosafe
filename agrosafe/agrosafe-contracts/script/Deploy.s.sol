@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Script, console} from "forge-std/Script.sol";
-import {AgroSafe} from "../src/AgroSafe.sol";
+import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
+import {AgroSafe} from "../src/Agrosafe.sol";
 
 contract DeployScript is Script {
     function run() external {
