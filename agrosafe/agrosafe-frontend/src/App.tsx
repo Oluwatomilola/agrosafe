@@ -24,3 +24,42 @@ const contractABI = [
   "function farmers(uint256) external view returns (uint256, string, address, string, bool)",
   "function produce(uint256) external view returns (uint256, uint256, string, string, bool)"
 ]
+
+const contractAddress = "" 
+
+function App() {
+  const [name, setName] = useState('')
+  const [location, setLocation] = useState('')
+  const [contract, setContract] = useState<ethers.Contract | null>(null)
+
+  const connectWallet = async () => {
+    if (window.ethereum) {
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      await provider.send("eth_requestAccounts", [])
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(contractAddress, contractABI, signer)
+      setContract(contract)
+    } else {
+      alert("Please install MetaMask!")
+    }
+  }
+
+        <h2>Farmer Registration</h2>
+        <input
+          type="text"
+          placeholder="Farmer Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
+        <button onClick={handleRegister}>Register Farmer</button>
+      </div>
+    </>
+  )
+}
+
