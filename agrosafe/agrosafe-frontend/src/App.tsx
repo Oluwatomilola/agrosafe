@@ -44,22 +44,33 @@ function App() {
     }
   }
 
-        <h2>Farmer Registration</h2>
-        <input
-          type="text"
-          placeholder="Farmer Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        />
-        <button onClick={handleRegister}>Register Farmer</button>
-      </div>
-    </>
-  )
-}
-
+  const handleRegister = async () => {
+    const trimmedName = name.trim()
+    const trimmedLocation = location.trim()
+    if (!trimmedName || !trimmedLocation) {
+      alert("Please fill in all fields!")
+      return
+    }
+    if (trimmedName.length < 2 || trimmedName.length > 50) {
+      alert("Name must be between 2 and 50 characters!")
+      return
+    }
+    if (trimmedLocation.length < 2 || trimmedLocation.length > 100) {
+      alert("Location must be between 2 and 100 characters!")
+      return
+    }
+    if (!contract) {
+      alert("Please connect your wallet first!")
+      return
+    }
+    try {
+      const tx = await contract.registerFarmer(trimmedName, trimmedLocation)
+      await tx.wait()
+      alert(`Farmer registered successfully!`)
+      setName('')
+      setLocation('')
+    } catch (error) {
+      console.error(error)
+      alert("Registration failed!")
+    }
+  }
