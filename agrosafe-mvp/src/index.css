@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    /* AgroSafe Design System */
+    --background: 120 20% 98%;
+    --foreground: 150 30% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 30% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 30% 10%;
+
+    /* Primary: Rich Emerald Green */
+    --primary: 152 60% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Warm Earth */
+    --secondary: 35 40% 92%;
+    --secondary-foreground: 35 30% 25%;
+
+    /* Muted: Sage tones */
+    --muted: 120 15% 94%;
+    --muted-foreground: 150 10% 40%;
+
+    /* Accent: Golden Wheat */
+    --accent: 42 80% 55%;
+    --accent-foreground: 42 50% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 150 15% 88%;
+    --input: 150 15% 88%;
+    --ring: 152 60% 32%;
+
+    --radius: 0.75rem;
+
+    /* Custom colors */
+    --emerald-glow: 152 60% 45%;
+    --forest: 155 45% 22%;
+    --wheat: 42 75% 60%;
+    --earth: 30 35% 30%;
+    --sky: 200 70% 94%;
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(152 60% 32%) 0%, hsl(155 45% 22%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(42 80% 55%) 0%, hsl(35 70% 50%) 100%);
+    --gradient-overlay: linear-gradient(180deg, hsla(150 30% 10% / 0.7) 0%, hsla(150 30% 10% / 0.4) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px hsla(152 60% 32% / 0.08);
+    --shadow-md: 0 8px 24px hsla(152 60% 32% / 0.12);
+    --shadow-lg: 0 16px 48px hsla(152 60% 32% / 0.16);
+    --shadow-glow: 0 0 40px hsla(152 60% 45% / 0.3);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 152 60% 32%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 120 15% 94%;
+    --sidebar-accent-foreground: 150 30% 10%;
+    --sidebar-border: 150 15% 88%;
+    --sidebar-ring: 152 60% 32%;
+  }
+
+  .dark {
+    --background: 150 30% 6%;
+    --foreground: 120 20% 95%;
+
+    --card: 150 25% 10%;
+    --card-foreground: 120 20% 95%;
+
+    --popover: 150 25% 10%;
+    --popover-foreground: 120 20% 95%;
+
+    --primary: 152 55% 45%;
+    --primary-foreground: 150 30% 6%;
+
+    --secondary: 150 20% 15%;
+    --secondary-foreground: 120 20% 90%;
+
+    --muted: 150 20% 15%;
+    --muted-foreground: 150 15% 60%;
+
+    --accent: 42 70% 50%;
+    --accent-foreground: 42 50% 10%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 150 20% 18%;
+    --input: 150 20% 18%;
+    --ring: 152 55% 45%;
+
+    --sidebar-background: 150 25% 8%;
+    --sidebar-foreground: 120 20% 90%;
+    --sidebar-primary: 152 55% 45%;
+    --sidebar-primary-foreground: 150 30% 6%;
+    --sidebar-accent: 150 20% 15%;
+    --sidebar-accent-foreground: 120 20% 90%;
+    --sidebar-border: 150 20% 18%;
+    --sidebar-ring: 152 55% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  }
+
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-md border border-white/10;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-emerald-glow;
+  }
+
+  .glow {
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s ease-in-out infinite;
+  }
+}
